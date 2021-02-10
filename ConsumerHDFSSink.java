@@ -78,7 +78,8 @@ public class ConsumerHDFSSink {
         Path hdfsSitePath = new Path(hdfsSitePathString);
         conf.addResource(coreSitePath);
         conf.addResource(hdfsSitePath);
-
+        conf.set("fs.hdfs.impl",
+                org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.setBoolean("dfs.support.append", true);
         FileSystem fs = FileSystem.get(conf);
         FSDataOutputStream out = null;
