@@ -10,17 +10,17 @@ public class AvroV2Producer {
     public static void main(String[] args) {
         Properties properties = new Properties();
         // normal producer
-        properties.setProperty("bootstrap.servers", "13.72.105.213:9092");
+        properties.setProperty("bootstrap.servers", args[0]);
         properties.setProperty("acks", "all");
         properties.setProperty("retries", "10");
         // avro part
         properties.setProperty("key.serializer", StringSerializer.class.getName());
         properties.setProperty("value.serializer", KafkaAvroSerializer.class.getName());
-        properties.setProperty("schema.registry.url", "http://13.72.105.213:8081");
+        properties.setProperty("schema.registry.url", args[1]);
 
         Producer<String, Customer> producer = new KafkaProducer<String, Customer>(properties);
 
-        String topic = "customer-avro";
+        String topic = args[2];
 
         // copied from avro examples
         Customer customer = Customer.newBuilder()
