@@ -39,3 +39,5 @@ https://raw.githubusercontent.com/samarkk/sharerep/main/ProducerFileClientContin
         </dependency>
 
 /home/samar/Downloads/elasticsearch-7.12.0/bin/elasticsearch-sql-cli
+
+https://github.com/samarkk/test/blob/master/es_commands.txt
