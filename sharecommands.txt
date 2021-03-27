@@ -9,4 +9,7 @@ tlpg 8081
 /home/samar/confluent/bin/kafka-topics --zookeeper localhost:2181 --list
 /home/samar/confluent/bin/kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic customer-avro --from-beginning
 
+curl localhost:8081/subjects
+curl localhost:8081/subjects/customer-avro-value/versions/1
+sudo yum install -y jq
 
