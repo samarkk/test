@@ -1,3 +1,4 @@
+gedit /home/samar/confluent/etc/kafka/server.properties
 /home/samar/confluent/bin/kafka-server-stop
 /home/samar/confluent/bin/schema-registry-stop
 /home/samar/confluent/bin/kafka/kafka-server-start -daemon /home/samar/kafka/confluent/etc/kafka/server.properties
