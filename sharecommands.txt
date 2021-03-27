@@ -28,4 +28,4 @@ https://raw.githubusercontent.com/samarkk/sharerep/main/ProducerFileClientContin
 
 /home/samar/confluent/bin/kafka-topics --zookeeper localhost:2181 --create --topic tweets-topic --partitions 3 --replication-factor 1
 
- /home/samar/confluent/bin/kafka-console-consumer --bootstrap-server  localhost:9092  --topic tweets-topic --from-beginning
+ /home/samar/confluent/bin/kafka-console-consumer --bootstrap-server  localhost:9092  --topic tweets-topic --from-beginning --property print.key=true
