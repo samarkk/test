@@ -1,7 +1,7 @@
 gedit /home/samar/confluent/etc/kafka/server.properties
 /home/samar/confluent/bin/kafka-server-stop
 /home/samar/confluent/bin/schema-registry-stop
-/home/samar/confluent/bin/kafka-server-start -daemon /home/samar/kafka/confluent/etc/kafka/server.properties
+/home/samar/confluent/bin/kafka-server-start -daemon /home/samar/confluent/etc/kafka/server.properties
 tlpg 9092
 /home/samar/confluent/bin/schema-registry-start -daemon /home/samar/confluent/etc/schema-registry/schema-registry.properties
 tlpg 8081
