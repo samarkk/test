@@ -37,3 +37,5 @@ https://raw.githubusercontent.com/samarkk/sharerep/main/ProducerFileClientContin
             <artifactId>gson</artifactId>
             <version>2.8.6</version>
         </dependency>
+
+/home/samar/Downloads/elasticsearch-7.12.0/bin/elasticsearch-sql-cli
