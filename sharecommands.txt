@@ -14,3 +14,5 @@ curl localhost:8081/subjects/customer-avro-value/versions/1
 sudo yum install -y jq
 
 curl localhost:8081/subjects/customer-avro-value/versions/1 | jq
+
+/home/samar/elasticsearch/bin/elasticsearch -d
