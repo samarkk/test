@@ -25,3 +25,7 @@ tlpg 9200
             <version>7.12.0</version>
         </dependency>
 https://raw.githubusercontent.com/samarkk/sharerep/main/ProducerFileClientContinuous.java
+
+/home/samar/confluent/bin/kafka-topics --zookeeper localhost:2181 --create --topic tweets-topic --partitions 3 --replication-factor 1
+
+ /home/samar/confluent/bin/kafka-console-consumer --bootstrap-server  localhost:9092  --topic tweets-topic --from-beginning
