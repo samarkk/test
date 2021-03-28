@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class AvroProducerFileClient {
-    String bootstrapServers = "52.234.178.74:9092";
+    String bootstrapServers = "localhost:9092";
 
     private Properties createProducerConfig() {
         Properties props = new Properties();
@@ -22,7 +22,7 @@ public class AvroProducerFileClient {
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         props.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 5);
         props.put(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE - 1);
-        props.put("schema.registry.url", "http://52.234.178.74:8081");
+        props.put("schema.registry.url", "http://localhost:8081");
         return props;
     }
 
