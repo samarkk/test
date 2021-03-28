@@ -138,7 +138,7 @@ as description
 from 
 userprofilestream up 
 left join citytable ct 
-on up.countrycode = ct.countrycode;
+on up.citycode = ct.citycode;
 
 select * from up_ct_joined emit changes;
 
