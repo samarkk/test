@@ -24,7 +24,7 @@ public class ConsumerMySQL {
         try {
             String url = "jdbc:mysql://localhost:3306/testdb?rewriteBatchedStatements=true";
             String user = "root";
-            String password = "abcd";
+            String password = "puneetRai10198)";
 
             conn = DriverManager.getConnection(url, user, password);
         } catch (Exception ex) {
