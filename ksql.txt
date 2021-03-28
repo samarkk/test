@@ -67,7 +67,7 @@ ksql-datagen
 # just issue ksql-datagen
 # needs schema registry, message rate, key, value format, delimiter if using delimited format, iterations - if not specified ksql datagen will produce indefinitely , needs an avro schema file
 
-ksql-datagen schema=/mnt/c/Users/SAMAR/Onedrive/kafka_scripts/ksql/schemas/userprofile.avro format=json topic=USERPROFILE key=userid  iterations=1000 msgRate=1
+ksql-datagen schema=/home/samar/test/schemas/userprofile.avro format=json topic=USERPROFILE key=userid  iterations=1000 msgRate=1
 
  select rowtime, firstname, lastname, citycode, rating from userprofilestream emit changes limit 5;
 
@@ -77,7 +77,7 @@ ksql-datagen schema=/mnt/c/Users/SAMAR/Onedrive/kafka_scripts/ksql/schemas/userp
  SELECT TIMESTAMPTOSTRING(ROWTIME, 'dd/MMM hh:mm:ss') as createtime, FIRSTNAME + ' ' + ucase(LASTNAME) as fullname from userprofilestream emit changes limit 10;
 
  # run a script to run a query
- run script '/mnt/c/Users/SAMAR/OneDrive/kafka_scripts/ksql/user_profile_pretty.ksql';
+ run script '/home/samar/test/user_profile_pretty.ksql';
 
 # to see query details
 describe extended user_profile_pretty;
@@ -310,7 +310,7 @@ select * from weathernow where city_name = 'Kota' emit changes;
 # see the ktable changes being reflect
 Let's make it rain! At UNIX prompt
 
-cat /mnt/c/Users/SAMAR/Onedrive/kafka_scripts/ksql/demo-weather-changes.jsonl | kafka-console-producer --broker-list localhost:9092 --topic WEATHERNESTED  
+cat /home/samar/test/demo-weather-changes.jsonl | kafka-console-producer --broker-list localhost:9092 --topic WEATHERNESTED  
 
 select * from weathernow where city_name = 'Delhi' emit changes;
 
@@ -347,9 +347,9 @@ left join CITYTABLE ct on ct.citycode=dp2.citycode emit changes;
 ```
 ## merging streams
 ## datagen into the two topics
-ksql-datagen schema=/mnt/c/Users/SAMAR/Onedrive/kafka_scripts/ksql/schemas/riderequest-north.avro format=avro topic=riderequest-north key=rideid iterations=10000 msgRate=1
+ksql-datagen schema=/home/samar/test/schemas/riderequest-north.avro format=avro topic=riderequest-north key=rideid iterations=10000 msgRate=1
 
-ksql-datagen schema=/mnt/c/Users/SAMAR/Onedrive/kafka_scripts/ksql/schemas/riderequest-south.avro format=avro topic=riderequest-south key=rideid maxInterval=5000 iterations=10000 msgRate=1
+ksql-datagen schema=/home/samar/test/riderequest-south.avro format=avro topic=riderequest-south key=rideid maxInterval=5000 iterations=10000 msgRate=1
 
 create stream rr_north_raw with (kafka_topic='riderequest-north', value_format='avro');  
 
