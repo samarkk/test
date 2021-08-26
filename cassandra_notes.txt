@@ -1,0 +1,347 @@
+cassandra is decentralized
+setting up 50 nodes is same for all
+each of the 50 nodes has the same capability
+mongodb is master/slave architecture
+cassandra is tuneably consistent
+cassandra is eventually consistent
+models of consistency - strict, casual, weak(eventual) 
+Dynamo and Cassandra choose to be always writable, opting to defer the complexity
+of reconciliation to read operations, and realize tremendous performance gains
+software development: You can have it good, you can have it fast, you can have it cheap: pick two
+cassandra and Dynamo db - availability and partition tolerance
+rdbms - consistency and availability
+monddb, hbase - consistency and partition tolerance
+cassandra - partitioned row store
+sparse multidimensional hash tables
+cassandra is referred to as a column oriented database but its data store is row oriented. there can be a difference between api exposed and the underlying storage
+ql schema is used with cassandra
+in the transitional phase cassandra was  termed schema optional
+
+CQL collections such as lists, sets, and especially maps provide the ability to add content in a less structured form that can be leveraged to extend an existing schema. 
+CQL also provides the ability to change the type of columns in certain instances, and facilities to support the storage of JSON-formatted text.
+So perhaps the best way to describe Cassandra’s current posture is that it supports “flexible schema.”
+
+Cassandra originated at Facebook in 2007 to solve its inbox search problem
+cassandra - daughter of king priam and queen hecuba of Troy, granted divination powers, rebuffed advances of god Apollo was cursed to be not believed by anyone. also a joke on the oracle of delphi
+
+release 2.0 marked the culmination of the cql capability
+Native CQL protocol improvements began to make CQL demonstrably more
+performant than Thrift
+2.2 - windows fully supported operating system
+ticktock releases - Starting with the Cassandra 3.0 release, even-numbered releases are feature releases
+with some bug fixes, while odd-numbered releases are focused on bug fixes, with the
+goal of releasing each month.
+3.0 - thrift based cli was removed
+Cassandra is optimized for excellent throughput on writes
+
+interface
+This directory contains a single file, called cassandra.thrift. This file defines a legacy
+Remote Procedure Call (RPC) API based on the Thrift syntax. The Thrift
+interface was used to create clients in Java, C++, PHP, Ruby, Python, Perl, and C#
+prior to the creation of CQL. The Thrift API has been officially marked as deprecated
+in the 3.2 release and will be deleted in the 4.0 release.
+
+cannot ask for timestamp on primary key columns
+writetime function used to find the timestamp for the column
+update table using timestamp <the timestamp> set x = '' where y = <>;
+
+ttl defaults to null - data will not expire
+update <table> using ttl <number> set column = <> where column = <>
+ttl like timestamp set at column level, cannot be set for row level and for primary columns also
+
+enums are managed using Enum.name() to convert enumerated value into string for writing to cassandra and Enum.value() to convert string to enumerated value
+
+The best practice is to always provide time zones rather than relying on the operating
+system time zone configuration.
+
+date and time separately availabile from cassandra 2.1 onwards
+
+cqlsh provides several convenience functions for interacting with the timeuuid type: now(), dateOf() and unixTimestampOf()
+The availability of these convenience functions is one reason why timeuuid tends
+to be used more frequently than uuid.
+
+Cassandra is one of the few databases that provides race-free increments across data centers for counters Remember: the increment and decrement operators are not idempotent.
+
+##############################################
+counters example
+##############################################
+-- all columns other than counters have to be primary key columns
+-- insert not allowed, only update will work
+create table cttbl(symbol text, expiry text, trdate text, actr counter, primary key (symbol, expiry, trdate));
+insert into cttbl(symbol, expiry, trdate) values ('infy', 'adate', '1');
+update cttbl 
+set actr = actr + 1 
+where symbol = 'infy' and expiry = 'e1' and trdate = 't1';
+
+ update  atbl using ttl 120 set col1 = 1;
+
+ "Cannot use selection function ttl on collections"
+
+ filtering on columns other than primary key not allowed
+
+  create custom index cpridx on fotable(cpr) using 'org.apache.cassandra.index.sasi.SASIIndex';
+
+Hotels
+Collection of Rooms
+Rate and availability of thses rooms
+Booked by Guests
+Record of reservations booked for Guests
+
+Hotels maintain a collection of points of interest
+parks, monuments, museums, shopping locations, theaters, shows etc
+
+define queries
+Q1. Find hotels near a given point of interest.
+Q2. Find information about a given hotel, such as its name and location.
+Q3. Find points of interest near a given hotel.
+Q4. Find an available room in a given date range.
+Q5. Find the rate and amenities for a room.
+Q6. Lookup a reservation by confirmation number.
+Q7. Lookup a reservation by hotel, date, and guest name.
+Q8. Lookup all reservations by guest name.
+Q9. View guest details.
+
+to name each table identify the primary entity type for which we are querying and use that to start the entity name
+if querying by attributes of other related entities, append those to the table name, separate with _by_
+identify the primary key of the table adding partition key columns based on required attributes, and clustering columns to guarantee uniqueness and support desired sort ordering
+complete each table by identifying any additional attributes
+
+hotel logical model diagram
+One thing we notice immediately is that our Cassandra design doesn’t include dedicated tables for rooms or amenities, as we had in the relational design
+
+q1 and q2 could have been combined. in hotels we could have store a collection of points of interest nearby
+
+q3 is a reverse of q1 
+
+Use clustering columns to store attributes that you need to access in a range query. Remember that the order of the clustering columns is important
+  
+Reservations logical model
+
+We’ve already used one of the most common patterns in our hotel model—the wide row
+
+Q - why is hotel a wide row 
+because for each row for each partition key we will have multiple values when we have a primary key which is longer than the partition key
+so if there is symbol and expiry and then trdate, instrument etc to make it unique 
+we have 'TCS','2018-02-05': [v1, v2, v3, v4] where each of v1, v2, v3, v4 will have the remaining column values and ther will be a row for each primary key
+so for a primary key one partition key and rows for each remaining clustering keys  and each row has the clustering key and remaining columns as cells and these cells can be as many and be present for some columns only
+
+The time series pattern is an extension of the wide row pattern. In this pattern, a series of measurements at specific time intervals are stored in a wide row, where the measurement time is used as part of the partition key
+
+One design trap that many new users fall into is attempting to use Cassandra as a queue.
+Each item in the queue is stored with a timestamp in a wide row. Items are appended to the end of the queue and read from the front, being deleted after they are read. 
+This is a design that seems attractive, especially given its apparent similarity to the time series pattern. 
+
+The problem with this approach is that the deleted items are now tombstones that Cassandra must scan past in order to read from the front of the queue. 
+Over time, a growing number of tombstones begins to degrade read performance
+
+The PRIMARY KEY clause identifies the primary key for the materialized view, which must include all of the columns in the primary key of the base table. 
+This restriction keeps Cassandra from collapsing multiple rows in the base table into a single row in the materialized view, which would greatly increase the complexity of managing updates.
+
+However, because we cannot (at least in early 3.X releases) create a materialized view with multiple non-primary key column from the base table
+
+Out of the box, Cassandra comes with a default configuration of a single data center ("DC1") containing a single rack ("RAC1").
+
+q - how can data placment be optimized in cassandra so as to have data placed closest to place of production as well as consumption
+
+configuration
+ccm able to install with default python 3.8 installation
+
+The cluster name, partitioner, and snitch must be the same in all of the nodes participating in the cluster
+
+default cluster name 'Test Cluster'
+ccm create -v 3.11.10 -n 3 my_cluster --vnodes
+without vnodes will create nodes with a  single token
+
+ccm status
+ccm start
+ccm node1 status
+ccm node1 ring
+
+seed nodes do not auto bootstrap because it is assumed that they will be the first nodes in the cluster
+
+To ensure high availability of Cassandra’s bootstrapping process, it is considered a best practice to have at least two seed nodes per data center
+
+The org.apache.cassandra.locator.SeedProvider interface specifies the contract that must be implemented
+
+partitioner
+The purpose of the partitioner is to allow you to specify how partition keys should be sorted, which has a significant impact on how data will be distributed across your nodes
+
+You can’t change the partitioner once you’ve inserted data into a cluster, so take care before deviating from the default
+
+Configuring your column family to use order-preserving partitioning (OPP) allows you to perform range slices
+
+It’s worth noting that OPP isn’t more efficient for range queries than random partitioning— it just provides ordering. It has the disadvantage of creating a ring that is potentially very lopsided, because real-world data typically is not written to evenly
+
+Because of these factors - lopsided key distribution - leading to hotspots, usage of order preserving partitioners is discouraged. Instead, use indexes.
+
+It turns out that in order to minimize hotspots, additional knowledge of the topology is required. 
+An improvement to token selection was added in 3.0 to address this issue. 
+Configuring the allocate_tokens_ keyspace property in cassandra.yaml with the name of a specific keyspace instructs the partitioner to optimize token selection based on the replication strategy of that keyspace.
+
+snitches
+The job of a snitch is simply to determine relative host proximity. 
+Snitches gather some information about your network topology so that Cassandra can efficiently route requests.
+Inferring data centers is the job of the replication strategy.
+
+PropertyFileSnitch is what is known as a rack-aware snitch, meaning that it uses information you provide about the topology of your cluster in a standard Java key/value properties file called cassandratopology.properties
+
+Gossiping Property File Snitch
+The data exchanges information about its own rack and data center
+location with other nodes via gossip. 
+The rack and data center locations are defined in the cassandra-rackdc.properties file. 
+The GossipingPropertyFileSnitch also uses the cassandra-topology.properties file, if present.
+
+Cassandra wraps your selected snitch with a org.apache.cassandra.locator.DynamicEndpointSnitch in order to select the highest performing nodes for queries.
+dynamic_snitch_badness_threshold - default value of 0.1
+The dynamic snitch updates this status according to the dynamic_snitch_update_interval_in_ms property, and resets its calculations at the duration specified by the dynamic_snitch_reset_interval_in_ms property
+
+ccm node1 ring | cut -d ' ' -f 1 | grep '127.0.0.1' | wc -l
+could do with straight grep also
+
+How Many vnodes?
+Many Cassandra experts have begun to recommend that the default num_tokens be changed from 256 to 32. 
+They argue that having 32 tokens per node provides adequate balance between token ranges, while requiring significantly less bandwidth to maintain. 
+Look for a possible change to this default in a future release.
+
+ccm add node4 -i 127.0.0.4 -j 7400
+
+What Are Durable Writes?
+The durable_writes property allows you to bypass writing to the commit log for the keyspace. 
+This value defaults to true, meaning that the commit log will be updated on modifications. 
+Setting the value to false increases the speed of writes, but also has the risk of losing data if the node goes down before the data is flushed from memtables into SSTables.
+
+The first replica will always be the node that claims the range in which the token falls, but the remainder of the replicas are placed according to the replication strategy you use
+
+Reading and Writing data
+
+Because of the database commit log and hinted handoff design, the database is always writable, and within a column family, writes are always atomic.
+
+Insert, Update, and Upsert
+Because Cassandra uses an append model, there is no fundamental difference between the insert and update operations. 
+If you insert a row that has the same primary key as an existing row, the row is replaced. 
+If you update a row and the primary key does not exist, Cassandra creates it.
+
+The most notable consistency level for writes is the ANY level. This level means that the write is guaranteed to reach at least one node, but it allows a hint to count as a successful write.
+
+vnodes and replication
+what i understood
+first node as per partitioner 
+remainder as per replication strategy
+verifed tokens generated for vnodes are different for each node
+so on the following replicas data is placed as per replication strategy and not the partition key
+ sorted([x for x in zip(range(1, 7), [n1t1, n1t2, n1t3, n2t1, n2t2, n2t3])], key = lambda x: x[1])
+ where n1t1 etc are the tokens copied for the various nodes
+ 
+ ccm node1 ring | grep '127.0.0.1' | tr -s ' ' | cut -d ' ' -f 8  > n1nosort.txt
+
+verified that the tokens are printed sorted - no difference
+ ccm node1 ring | grep '127.0.0.1' | tr -s ' ' | cut -d ' ' -f 8 | sort > node1ts.txt
+ diff n1nosort.txt node1ts.txt
+
+ Cassandra writes commit logs to the filesystem as binary files. The commit log files are found under the $CASSANDRA_HOME/data/commitlog directory.
+
+SSTables
+ Looking in the data directory, you’ll see a directory for each keyspace. 
+ These directories, in turn, contain a directory for each table, consisting of the table name plus a UUID. 
+ The purpose of the UUID is to distinguish between multiple schema versions, because the schema of a table can be altered over time.
+
+ The files are named according to the pattern <version>-<generation>-
+<implementation>-<component>.db.
+
+The version is a two-character sequence representing the major/minor version of the SSTable format. for 3.11 - md
+The generation is an index number which is incremented every time a newSSTable is created for a table.
+
+The implementation is a reference to the implementation of the org.apache.cassandra.io.sstable.format.SSTableWriter interface in use. 
+
+As of the 3.0 release the value is “big”, which references the “Bigtable format”found in the org.apache.cassandra.io.sstable.format.big.BigFormat class.
+
+Each SSTable is broken up into multiple files or components. These are the components
+as of the 3.0 release:
+
+*-Data.db
+These are the files that store the actual data and are the only files that are preserved by Cassandra’s backup mechanisms
+
+*-CompressionInfo.db
+Provides metadata about the compression of the Data.db file.*-Digest.adler32 Contains a checksum for the *-Data.db file. (Releases prior to 3.0 use CRC 32 checksums and the .crc32 extension.)
+
+*-Filter.db Contains the bloom filter for this SSTable.*-Index.db
+Provides row and column offsets within the corresponding *-Data.db 
+file
+
+Summary.db
+A sample of the index for even faster reads.
+
+Statistics.db
+Stores statistics about the SSTable which are used by the nodetool table histograms command.
+
+TOC.txt
+Lists the file components for this SSTable.
+
+this below is a lightweight transaction example
+and we could follow it up with an update where we change something only if name = 'Super Hotel at WestWorld'
+INSERT INTO hotel.hotels (id, name, phone) VALUES (
+'AZ123', 'Super Hotel at WestWorld', '1-888-999-9999') IF NOT EXISTS;
+
+Conditional write statements can have a serial consistency level in addition to the regular consistency level. The serial consistency level determines the number of nodes that must reply in the Paxos phase of the write, when the participating nodes are negotiating about the proposed write
+
+The two available options are shown in Table 9-2.
+Table 9-2. Serial consistency levels Consistency level Implication
+SERIAL This is the default serial consistency level, indicating that a quorum of nodes must respond.
+LOCAL_SERIAL Similar to SERIAL, but indicates that the transaction will only involve nodes in the local data center.
+
+You can set a default serial consistency level for all statements in cqlsh using the SERIAL CONSISTENCY statement, or in the DataStax Java Driver using the Query Options.setSerialConsistencyLevel() operation.
+
+Only modification statements (INSERT, UPDATE, or DELETE) may be included in a batch.
+• Batches are atomic—that is, if the batch is accepted, all of the statements in a batch will succeed eventually. This is why Cassandra’s batches are sometimes referred to as atomic batches or logged batches
+
+cql does not support or 
+this does not work
+select * from tftbl where (symbol = 'TCS' and expdt = '2021-02-25') or (symbol = 'ITC' and expdt = '2021-03-28');
+SyntaxException: line 1:42 mismatched input 'and' expecting ')' (... where (symbol = 'TCS' [and]...)
+
+this below works
+ select * from tftbl where symbol in ('TCS', 'ITC') and expdt in ('2021-02-25', '2021-03-28');
+
+ All updates in a batch belonging to a given partition key are performed in isolation, but there is no isolation guarantee across partitions. This means that modifications to different partitions may be read before the batch completes
+ what the above point implies is that if we have a batch with updates to multiple partitions, updates to a single partition will be done in isolation so if we ask for TCS and 2021-02-25 if it is being updated it will complete and then only we will have these values available but for other partitions modifications such as to ITC and 2021-03-28 may be read before the batch completes.
+
+ Counter modifications are only allowed within a special form of batch known as a counter batch. A counter batch can only contain counter modifications
+
+Creating Counter Batches in DataStax Drivers
+The DataStax drivers do not provide separate mechanisms for counter batches. Instead, you must simply remember to create batches that include only counter modifications or only noncounter modifications.
+
+Here’s how a batch works under the covers: the coordinator sends a copy of the batch called a batchlog to two other nodes, where it is stored in the system.batchlog table. The coordinator then executes all of the statements in the batch, and deletes the batchlog from the other nodes after the statements are completed.
+
+To give ample time for the coordinator to complete any in-progress batches, Cassandra uses a grace period from the timestamp on the batch statement equal to twice the value of the write_request_timeout_in_ms property
+
+Any batches that are older than this grace period will be replayed and then deleted from the remaining node
+
+The cassandra.yaml file contains two properties that control how this works: the batch_size_warn_threshold_in_kb property defines the level at which a node will log at the WARN log level that it has received a large batch, while any batch exceeding the value set batch_size_fail_threshold_in_kb will be rejected and result in error notification to the client. The batch size is measured in terms of the length of the CQL query statement. The warning threshold defaults to 5KB, while the fail threshold defaults to 50KB.
+
+reads
+If two nodes respond with different timestamps, the newest value wins, and that’s what will be returned to the client. In the background, Cassandra will then perform what’s called a read repair:
+
+ANY consistency level is not supported for read operations
+consistency level ONE the first node to respond to the read operation is the value that the client will get—even if it is out of date. The read repair operation is performed after the record is returned
+
+A node is considered unresponsive if it does not respond to a query before the value specified by rpc_timeout_in_ms in the configuration file. The default is 10 seconds.
+
+Aligning Read and Write Consistency Levels
+Cassandra can guarantee strong consistency on reads by using read and write consistency levels whose sum exceeds the replication factor. One simple way to achieve this is to require QUORUM for reads and writes. For example, on a keyspace with a replication factor of 3, QUORUM represents a response from 2 out of three nodes. Because 2 + 2 > 3, strong consistency is guaranteed
+
+There is only a single memtable for a given table
+
+bloom_filter_fp_chance property
+
+The key cache is implemented as a map structure in which the keys are a combination of the SSTable file descriptor and partition key, and the values are offset locations into SSTable files
+
+If you are using one of the two stronger consistency levels (QUORUM or ALL), then the read repair happens before data is returned to the client.
+
+COPY hotels TO 'hotels.csv' WITH HEADER=TRUE
+COPY hotels FROM 'hotels.csv' WITH HEADER=true;
+
+The syntax of the WHERE clause involves the following rules:
+• All elements of the partition key must be identified
+• A given clustering key may only be restricted if all previous clustering keys are restricted
+
+user-defined functions (UDFs) and user-defined aggregates (UDAs) can improve performance in some situations by reducing the amount of data that has to be returned to the client and reducing processing load on the client, at the cost of additional processing on the server.
