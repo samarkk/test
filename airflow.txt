@@ -1,0 +1,403 @@
+airflow
+basics - web server and a scheduler and a metastore and an executor and a command line
+a node that has a web server, scheduler and an executor
+executor pushes tasks into a queue and then that task has to be executed
+multiple node set up - web server, scheduler and executor in  one node
+metastore and queue - external queue in another node
+queue may be redis , mq 
+and tasks pushed from queue to worker node
+may have multiple worker nodes
+
+folder with dags - parsed by web server and scheduler, task instance created and sent to executor - which will update the task instance information in the metastore
+define DAGs in airflow
+
+operators are tasks - spark operator, hive operator, hdfs operator, move file operator and so on
+three types of operators
+actions, transfers and sensors
+dependencies between tasks
+handle timezone differences
+scale dags up
+through celery
+
+export AIRFLOW_HOME=~/airflow
+
+############################################################
+installation 
+############################################################
+had to create a separate 3.8 environment to get past the spyder qt5webengine and qt5 obstacles 
+
+AIRFLOW_VERSION=2.1.2
+PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
+# For example: 3.6
+CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
+# For example: https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-3.6.txt
+pip install "apache-airflow==${AIRFLOW_VERSION}" --constraint "${CONSTRAINT_URL}"
+pip install "apache-airflow==2.1.2" --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-3.8.txt
+pip install 'apache-airflow-providers-http'
+pip install 'apache-airflow-providers-apache-hdfs'
+pip install 'apache-airflow-providers-apache-hive'
+
+while installing the above was getting 
+sasl/saslwrapper.h:22:10: fatal error: sasl/sasl.h: No such file or directory
+sudo apt-get install libsasl2-dev fixed it
+
+for centos 
+conda install sasl
+did it
+
+pip install 'apache-airflow-providers-apache-spark'
+# initialize the database
+airflow db init
+
+airflow users create \
+    --username admin \
+    --firstname Peter \
+    --lastname Parker \
+    --role Admin \
+    --email spiderman@superhero.org
+
+# start the web server, default port is 8080
+airflow webserver --port 8080
+
+#########################################################
+if doesn't start as a daemon remove the airfow-webserver-monitor.pid file
+in the AIRFLOW_HOME directory
+likewise remove the scheduler.pid file
+#########################################################
+
+# start the scheduler
+# open a new terminal or else run webserver with ``-D`` option to run it as a daemon
+airflow scheduler
+
+# visit localhost:8080 in the browser and use the admin account you just
+# created to login. Enable the example_bash_operator dag in the home page
+
+airflow webserver ui dags, runs, tasks, actions, links, schedules
+
+on a dag, we have tree view, graph view, gantt telling duration, parallelism, squencing  of tasks, code showing the code obviously
+
+in graph view right click a task and more tabs for details will show up
+
+dags cli
+what it only can do - triggering backfills of dags even if backfilling is disabled
+an example why cli will be needed
+
+airflow commands are grouped
+airflow db init - creates folders, users
+airflow db reset - will reset
+
+airflow db upgrade - to upgrade
+
+airflow celery worker - to start a worker
+airflow dags list
+
+# trigger a dag
+airflow dags trigger example_bash_operator -e 2021-03-01
+
+# see the runs for a dag
+airflow dags list-runs -d example_bash_operator
+
+#backfill
+airflow dags backfill -s <start_date> -e <end_date> --reset-diagrams
+
+# list the tasks
+airflow tasks list example_bash_operator
+
+dag in airflow is a data pipeline
+dags cannot have loops
+
+default_args are arguments for the tasks
+catchup = False to prevent all tasks up till current date
+
+each operator must have a unique id in a DAG
+
+set_downstream >>
+set_upstream <<
+
+task1 >> task2 >> task3
+task3 >> task4 
+task4 >> task5
+
+start_date and schedule_interval
+as a best practice set start_date at the dag level
+
+schedule_interval use cron expressions 
+@daily is a cron expression
+@daily = 00***
+@hourly = 0****
+end_date set to none - should stick with this ?
+cron expression
+minute hour day month day
+* any value
+, value list separator
+/ step values
+0-23 allowed values
+
+dag will start at start_date plus schedule_interval
+schedule_interval cron expression or timedelta
+
+airflow dags trigger 
+to start a dag run
+a DagRun is an instance of a dag run
+DagRuns should be idempotent
+
+catchup by default is true
+can be configured for a dag
+in airflow.cfg catchup_by_default = True
+
+if catchup is false then the most recent dag run will still be run
+the other ones will be left behind
+
+pendulum to make dags timezone aware
+cron expression - dags will run at the exact same time
+
+cron vs timedelta with catchup
+item 38 - and the note -cron  expression vs timedealta with catchup
+
+to set time zone to local time in airflow.cfg set default_timezone = local
+
+dag runs are independent
+if we want a task in  a dagrun to run only if it was successful in the previous dagrun then change depends_on_past from default False to True
+
+wait_for_downstream - enforce for a given task X to wait for tasks immediately downstream of its previous instance to finish successfully
+
+organizing dags folder
+zip file
+dagbag and .airflowingone
+
+worker_refresh_interval triggers the process to collect dags into a dagbag
+
+airflow webserver
+flask
+gunicorn server
+master process
+worker worker worker worker
+
+based on the pre-fork worker model
+web_server_master_timeout
+web_server_worker_timeout
+
+default workers 4 sync i.e synchroous
+2 * no of cores + 1 = no of workers is the recommended number of workers
+gunicorn requires 4 to 9 workers to handle thousands of requests per second
+
+workers = 4
+worker_class = sync
+
+worker_refresh_batch_size = 1
+number of workers to refresh at a time
+
+if a worker times out for any reason, workers are refreshed to bring workers equal to number of workers
+
+logging_level
+
+Dag failure detections
+success, failure callback
+
+Task failure detection
+email, email on success, failure, retry, max retries, execution_timeout, callbacks - failure, success, retry
+
+task retry default values
+retries 3
+retry_delay timedelta(seconds = 60)
+retry_exponential_backoff and max_retry_delay
+
+five categories of tests
+dag validation tests
+dag pipeline definition tests
+unit tests
+integration tests
+end to end pipeline tests
+
+conftest.py holds fixure pre test functions
+
+default sequential executor
+sqlite only one writer at any instance of time
+executor has tasks in its internal queue and specifies how to execute them
+executor does not execute tasks
+
+sequential executor runs a single task instance at a time in linear fashion
+does not support parallelism
+
+executor configuration 
+executor=SequentialExecutor
+sqlite_alchemy_conn=$AIRFLOW_HOME/airflow.db
+
+LocalExecutor
+python multiprocessing module to run tasks in parallel
+
+concurrency and parallelism parameters
+parallelism = 3 
+dag_concurrency - maximum active task instances scheduler can schedule at once per dag
+max_active_runs_per_dag
+
+recommended - set parallelism = number of cores - 1
+
+######################################################
+LocalExecutor with mysql
+######################################################
+mysql
+create database airflow;
+create user 'airflow'@'localhost' identified by 'airflow';
+grant all privileges on airflow.* to 'airflow'@'localhost' with grant option;
+flush privileges;
+
+install mysql client on wsl ubuntu
+sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
+
+for centos
+sudo yum install python3-devel mysql-devel
+
+pip install mysqlclient
+
+manager.services@maxlifeinsurance.com
+
+best practice - webserver and scheduler should be collocated
+AIRFLOW_CELERY_RESULT_BACKEND database. connection for celery
+
+airflow - DataProfiling -> Adhoc Queries
+need a connection to the database
+go to admin -> create connection -> host mysql, schema airflow, user airflow, password airflow
+select * from task_instances
+dag_runs 
+secure_mode = True in airflow.cfg
+Adhoc Queries gets replaced by Known Events
+use db to explore Queries
+
+celery executor
+architecture diagram - video 54
+can have a task execute on  a specific worker
+as that worker only may have the capabilities, the required installations
+
+redis-server --requirespass redispass
+FERNET_KEY to encrypt passwords
+flower - service to manage celery workers`
+can be started with 
+airflow flower
+localhost:5555 - flower web interface
+
+flower averageload - 1,5,15 minutes - if > 1
+worker_concurrency = 16
+how many tasks a worker can process concurrently
+
+worker port export 8793
+airflow.cfg
+worker_log_server_port = 8793
+pip install apache-airflow[postgres, celery, redis]
+
+broker_url will specify the broker
+broker_url = redis://redispass@redis:6379/1
+
+spark, hive etc will have to be installed on all workers
+
+queues create with worker_name appended such as worker_spark, worker_highcpu
+
+specialized allocation of tasks to workers
+command: worker -q worker_q1, worker_q2, worker_q3
+from the flower dashboard, cancel tasks for queues retaining only the ones that are to be handled by that queue
+
+pools - limit concurrency of dags without changing airflow parameters
+add argument
+pool = some_pool
+add priority_weight to give higher importance to higher number
+
+kubernetes - architecture diagram - video 60 3:07
+kubernetes - important objects diagram - video 60 5:20
+
+master node and worker nodes
+master node runs the control plane
+
+control plane
+kube apiserver - frontend server for control plane handles api requests 
+cli, ui, api all feed into the apiserver
+kube scheduler - where to run newly created pods
+kube controller manager - responsible for runnig  resource controllers like deployments
+etcd - database - which node is available, what resources exist on the cluster
+
+worker nodes 
+run the workloads
+kubelet - responsible for driving the container runtime to start workloads that are scheduled on the node and monitoring their status
+kube-proxy - routing between nodes and pods and the internet
+
+pod - group of one or more containers with shared storage and network with a specification for how to run the containers
+replica set - a specified set of pds or sets of pods is always available
+relicas are defined into a deployment object
+deployment object will interact with other objects such as service, storage, persistent volume claims
+service is an abstraction that defines a logical set of pods and a policy by which to access them
+without service pods access would require their ip addresses. think of service as a gateway between you and your pods
+
+drawbacks of celery executor - video 61 - 1:20
+installations of all packages on each worker, some resources taken up even if worker is unused
+
+kubernetes
+one task = one pod
+resources not wasted - overcomes biggest drawback of celery
+three ways of dag distribution
+git init-container
+mounting a shared volume with the dag definitions
+packaging dags into a new image that we deploy using the ci/cd pipeline
+
+kubernetes executor
+pod each webserver, scheduler and metastore
+vagrantup.com and install vagrant
+vagrant plugin install vagrant-vbgues vagrant-scp
+
+for sub dags SubDagOperator
+sub dags may lead to deadlock
+sub dag has lets say n tasks and there are less than n slots - all slots occupied and sub dag waiting and deadlock
+one way to avoid deadlocks is  create a queue and assign the subdag tasks to that queue
+
+
+subdag = factory_subdag(DAG_NAME, 'sudag-1', default_args)
+this above is a custom coded method
+
+in author's opinion, stay away from subdags and if not then use SequentialExecutor
+
+Branching
+BranchPytonOperator - will return the branch task to execute
+if there is depends_on_past and a branch task is skipped or not completed then following dagrun the other tasks will be executed
+do not have an empty path in branching - use dummy operator instead
+
+trigger_rule default 'all_success' can be changed to 'one_success
+all_failed
+all_done - may be success, failure
+one_failed
+none_failed
+none_skipped
+
+{{ ds }} - execution date
+var.value.<variable name>
+
+bash operator video 72 - 11:00 - parameter and script
+
+Xcoms - cross communication - shared data between dags
+key, value and timestamp
+Xcoms no size limit but keep them small
+
+xcom_push or return value from pythonoperator
+xcom_pull to get
+
+ti stands for task instance
+
+TriggerDagRunOperator
+one is controller one is target 
+
+sudo amazon-linux-extras install docker
+
+##################################################
+terminate airflow processes
+##################################################
+alias psfg='sudo ps faux | grep -v grep | grep  '
+for x in $(psfg airflow | tr -s ' ' | cut -d ' ' -f 2);do sudo kill -9 $x;done
+and for defunct do 
+ps -ef | grep airflow 
+and kill the parent process
+##################################################
+
+airflow docker installation in tmp directory
+docker-compose.yaml moved to docker-compose.yamlorig
+docker-compose_cust.yaml moved to docker-compose.yaml
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+
