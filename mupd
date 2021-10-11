@@ -1,10 +1,9 @@
-git clone https://github.com/samarkk/test
 mkdir /c/data
 cp /test/*.csv /c/data
 cp /test/Vagrantfile /c/vagpg/kafkasecmon
 cp /c/Windows/System32/drivers/etc/hosts /c/Windows/System32/drivers/etc/hostsbkup
-cat /test/hosts >> /c/Wndows/System32/drivers/etc/hosts
-cat /c/Wndows/System32/drivers/etc/hosts
+cat /test/hosts >> /c/Windows/System32/drivers/etc/hosts
+cat /c/Windows/System32/drivers/etc/hosts
 rm -rf /test
 ls -l /c/data
 
