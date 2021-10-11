@@ -1,0 +1,7 @@
+cd /c
+git clone https://github.com/samarkk/test
+mkdir /c/data
+cp /c/test/*.csv /c/data
+cp /c/test/Vagrantfile /c/vagpg/kafkasecmon
+cp /c/Wndows/System32/drivers/etc/hosts /c/Windows/System32/drivers/etc/hostsbkup
+cat /c/test/hosts >> /c/Wndows/System32/drivers/etc/hosts
