@@ -3,3 +3,5 @@
 192.168.50.4  node2.e4rlearning.com node2
 192.168.50.5  admin.e4rlearning.com admin
 192.168.50.6  node3.e4rlearning.com node3
+
+/home/vagrant/kafka/bin/kafka-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --topic 
