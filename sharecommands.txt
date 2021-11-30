@@ -1,45 +1,5 @@
-gedit /home/samar/confluent/etc/kafka/server.properties
-/home/samar/confluent/bin/kafka-server-stop
-/home/samar/confluent/bin/schema-registry-stop
-/home/samar/confluent/bin/kafka-server-start -daemon /home/samar/confluent/etc/kafka/server.properties
-tlpg 9092
-/home/samar/confluent/bin/schema-registry-start -daemon /home/samar/confluent/etc/schema-registry/schema-registry.properties
-tlpg 8081
-
-/home/samar/confluent/bin/kafka-topics --zookeeper localhost:2181 --list
-/home/samar/confluent/bin/kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic customer-avro --from-beginning
-
-curl localhost:8081/subjects
-curl localhost:8081/subjects/customer-avro-value/versions/1
-sudo yum install -y jq
-
-curl localhost:8081/subjects/customer-avro-value/versions/1 | jq
-
-/home/samar/elasticsearch/bin/elasticsearch -d
-tlpg 9200
-
-
- <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>7.12.0</version>
-        </dependency>
-https://raw.githubusercontent.com/samarkk/sharerep/main/ProducerFileClientContinuous.java
-
-/home/samar/confluent/bin/kafka-topics --zookeeper localhost:2181 --create --topic tweets-topic --partitions 3 --replication-factor 1
-
- /home/samar/confluent/bin/kafka-console-consumer --bootstrap-server  localhost:9092  --topic tweets-topic --from-beginning --property print.key=true
- 
- twint -s 'corona' -o tweets.json --json
-
-<dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-        </dependency>
-
-/home/samar/Downloads/elasticsearch-7.12.0/bin/elasticsearch-sql-cli
-
-https://github.com/samarkk/test/blob/master/es_commands.txt
-
-https://github.com/samarkk/kafka-examples/blob/main/src/main/scripts/kafka-cli/topic_configurations.txt
+192.168.50.2  master.e4rlearning.com master
+192.168.50.3  node1.e4rlearning.com node1
+192.168.50.4  node2.e4rlearning.com node2
+192.168.50.5  admin.e4rlearning.com admin
+192.168.50.6  node3.e4rlearning.com node3
