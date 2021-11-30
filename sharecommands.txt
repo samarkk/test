@@ -5,3 +5,6 @@
 192.168.50.6  node3.e4rlearning.com node3
 
 /home/vagrant/kafka/bin/kafka-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --topic 
+/home/vagrant/kafka/bin/kafka-avro-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --property schema.registry.url=http://master:8081 --topic customer-avro
+
+
