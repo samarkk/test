@@ -6,6 +6,7 @@
 
 /home/vagrant/kafka/bin/kafka-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --topic 
 /home/vagrant/kafka/bin/kafka-avro-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --property schema.registry.url=http://master:8081 --topic customer-avro
+kafka-avro-console-consumer --bootstrap-server master.e4rlearning.com:9092 --from-beginning  --property print.offset=true --property print.partition=true --property print.timestamp=true --property schema.registry.url=http://master:8081 --topic nsefotopic-avro
 
 to start a new tab in tmux ctrl+b;c
 to activate a tab click on the tab or do ctrl+b;number of the tab
