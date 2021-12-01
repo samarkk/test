@@ -18,4 +18,8 @@ mysql -u root -pramanShastri24!
 create database testdb;
 use testdb;
 
+cd /c
+pwd 
+# verify pwd is /c
+git clone https://github.com/samarkk/test
 
