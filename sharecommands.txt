@@ -13,4 +13,7 @@ to rename a tab do ctrl+b;,
 to type in all panes do 
 ctrl+b;:setw syn - press the tab - syncrhonize-panes - toggle on and off
 
+kafka-consumer-groups --bootstrap-server master:9092 --group idegr1 --topic ide_topic --reset-offsets --to-earlieset --execute
+
+
 
