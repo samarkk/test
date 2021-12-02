@@ -29,3 +29,6 @@ git clone https://github.com/samarkk/test
 rm -rf /c/kafka-examples
 cd /c
 git clone https://github.com/samarkk/kafka-examples
+cd /c/kafka-examples
+mvn package
+
