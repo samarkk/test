@@ -32,3 +32,5 @@ git clone https://github.com/samarkk/kafka-examples
 cd /c/kafka-examples
 mvn package
 
+sudo kill -9 $(jps | grep -i connectdist | cut -d ' ' -f1)
+
