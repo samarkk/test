@@ -24,3 +24,8 @@ pwd
 # verify pwd is /c
 git clone https://github.com/samarkk/test
 
+# shut down inteelij and visual studio code
+# open git bash
+rm -rf /c/kafka-examples
+cd /c
+git clone https://github.com/samarkk/kafka-examples
