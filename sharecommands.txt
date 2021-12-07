@@ -1,3 +1,20 @@
+open gitbash
+go tto kafkasecmon
+cd /c/vagpg/kafkasecmon
+vagrant ssh admin
+nc -zv master 22
+nc -zv node1 22
+nc -zv node2 22
+ssh master
+sudo systemctl start zookeeper
+tlpg 2181
+sudo systemctl start kafka
+tlpg 909
+ssh node1
+sudo systemctl start kafka
+ssh node2
+sudo systemctl start kafka
+
 cd \vagpg\sakafka
 vagrant halt
 cd \vagpg\kafkasecmon
