@@ -1,36 +1,8 @@
-192.168.50.2  master.e4rlearning.com master
-192.168.50.3  node1.e4rlearning.com node1
-192.168.50.4  node2.e4rlearning.com node2
-192.168.50.5  admin.e4rlearning.com admin
-192.168.50.6  node3.e4rlearning.com node3
-
-/home/vagrant/kafka/bin/kafka-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --topic 
-/home/vagrant/kafka/bin/kafka-avro-console-consumer.sh --bootstrap-server master.e4rlearning.com:9092 --from-beginning --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --property schema.registry.url=http://master:8081 --topic customer-avro
-kafka-avro-console-consumer --bootstrap-server master.e4rlearning.com:9092 --from-beginning  --property print.offset=true --property print.partition=true --property print.timestamp=true --property schema.registry.url=http://master:8081 --topic nsefotopic-avro
-
-to start a new tab in tmux ctrl+b;c
-to activate a tab click on the tab or do ctrl+b;number of the tab
-to rename a tab do ctrl+b;,
-to type in all panes do 
-ctrl+b;:setw syn - press the tab - syncrhonize-panes - toggle on and off
-
-kafka-consumer-groups --bootstrap-server master:9092 --group idegr1 --topic ide_topic --reset-offsets --to-earlieset --execute
-mysql -u root -pramanShastri24!
-create database testdb;
-use testdb;
-
-cd /c
-pwd 
-# verify pwd is /c
-git clone https://github.com/samarkk/test
-
-# shut down inteelij and visual studio code
-# open git bash
-rm -rf /c/kafka-examples
-cd /c
-git clone https://github.com/samarkk/kafka-examples
-cd /c/kafka-examples
-mvn package
-
-sudo kill -9 $(jps | grep -i connectdist | cut -d ' ' -f1)
-
+# use git cmd
+# do the following
+cd /vagpg/sakafka
+vagrant up
+vagrant status
+# use gitbash
+cd /c/vagpg/sakafka
+vagrant ssh
