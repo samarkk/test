@@ -6,3 +6,7 @@ vagrant status
 # use gitbash
 cd /c/vagpg/sakafka
 vagrant ssh
+cd /tmp
+rm -rf zookeeper/*
+rm -rf kafka-logs/*
+
