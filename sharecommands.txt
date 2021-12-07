@@ -1,3 +1,4 @@
+/home/vagrant/kafka/bin/kafka-console-consumer.sh --bootstrap-server master:9092 --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --from-beginning --topic  
 open gitbash
 go tto kafkasecmon
 cd /c/vagpg/kafkasecmon
