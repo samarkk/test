@@ -1,3 +1,8 @@
+cd \vagpg\sakafka
+vagrant halt
+cd \vagpg\kafkasecmon
+vagrant up admin master node1 node2
+
 # use git cmd
 # do the following
 cd /vagpg/sakafka
