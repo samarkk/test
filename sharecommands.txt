@@ -10,3 +10,9 @@ cd /tmp
 rm -rf zookeeper/*
 rm -rf kafka-logs/*
 
+tmux --> to create multiple terminals
+Ctrl+b c -> to create a new terminal
+Ctrl+b , --> to rename the terminal
+Ctrl+b _ --> to horizontally split terminal
+Ctrl+b | --> to vertically split terminal
+Shift+right click --> to open the context menu in the tmux terminal
