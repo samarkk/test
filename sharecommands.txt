@@ -15,6 +15,7 @@ sudo systemctl start kafka
 ssh node2
 sudo systemctl start kafka
 
+# start the machines in gitcmd
 cd \vagpg\sakafka
 vagrant halt
 cd \vagpg\kafkasecmon
