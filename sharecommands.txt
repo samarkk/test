@@ -1,3 +1,5 @@
+db.coll1.insert({name: 'samar', profession: 'trainer', hobbies: ['learning', 'virtual reality']})
+db.coll1.insert({name: 'raman', profession: 'data item', hobbies: ['singing', 'dancing']})
 https://github.com/samarkk/kafka-examples/blob/main/src/main/scripts/connect/kakfa_connect_mongodb.txt
 # ensure you are in master
 # verify mysql d is running
