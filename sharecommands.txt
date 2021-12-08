@@ -1,5 +1,7 @@
 db.coll1.find()
 db.coll1.find({name: 'raman'},{hobbies: 1, _id: 0})
+db.coll1.update({name: 'samar'}, {"$set": {'devices': ['odyssey', 'quest']}})
+db.coll1.deleteMany({})
 
 db.coll1.insert({name: 'samar', profession: 'trainer', hobbies: ['learning', 'virtual reality']})
 db.coll1.insert({name: 'raman', profession: 'data item', hobbies: ['singing', 'dancing']})
