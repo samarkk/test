@@ -1,3 +1,4 @@
+https://github.com/samarkk/kafka-examples/blob/main/src/main/scripts/connect/kakfa_connect_mongodb.txt
 # ensure you are in master
 # verify mysql d is running
 sudo systemctl status mysqld
