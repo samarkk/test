@@ -1,3 +1,13 @@
+# on admin verify mongdb database servers running on 27017,27018,27019
+tlpg 270
+# on admin host start mongo
+mongo
+# add 27018 and 27019 to replica set
+rs.add({host:"admin.e4rlearning.com:27018"})
+rs.add({host:"admin.e4rlearning.com:27019"})
+# verify status - members should now show three dbs
+rs.status()
+
 db.coll1.find()
 db.coll1.find({name: 'raman'},{hobbies: 1, _id: 0})
 db.coll1.update({name: 'samar'}, {"$set": {'devices': ['odyssey', 'quest']}})
