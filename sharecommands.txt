@@ -1,3 +1,6 @@
+#ssh into master and start ksql-server
+ksql-server-start -daemon /home/vagrant/confluent/etc/ksql-server.properties
+
 # on admin verify mongdb database servers running on 27017,27018,27019
 tlpg 270
 # on admin host start mongo
