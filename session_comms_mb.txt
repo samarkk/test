@@ -12,3 +12,6 @@ open git command
 cd \vagpg\centoshbase
 vagrant up admin master node1 node2
 https://github.com/samarkk/test/blob/master/hadoop_comms.txt
+shak_rdd = sc.textFile('shakespeare.txt')
+shak_rdd.take(5)
+
