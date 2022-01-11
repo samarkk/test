@@ -14,4 +14,8 @@ vagrant up admin master node1 node2
 https://github.com/samarkk/test/blob/master/hadoop_comms.txt
 shak_rdd = sc.textFile('shakespeare.txt')
 shak_rdd.take(5)
+export PYSPARK_PYTHON=/usr/bin/python3
+export PYSPARK_DRIVER_PYTHON=/usr/bin/python3
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+
 
