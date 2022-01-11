@@ -8,3 +8,6 @@ open anaconda prompt
 pyspark
 ardd = sc.parallelize(range(1000))
 ardd.sum()
+open git command
+cd \vagpg\centoshbase
+vagrant up admin master node1 node2
