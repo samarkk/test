@@ -1,0 +1,39 @@
+### HDFS
+# format the namenode first
+hdfs namenode -format
+##### master is replicated everywhere so knock out hadoopdata everywhere first
+# start hdfs
+/home/vagrant/hadoop/sbin/start-dfs.sh
+# verify all datanodes up
+hdfs dfsadmin -report
+# set up the needed directories
+# set up for user vagrant
+hdfs dfs -mkdir -p /user/vagrant
+# make a world writeable tmp directory
+hdfs dfs -mkdir /tmp
+hdfs dfs -chmod -R 777 /tmp
+# make a directory to hold hbase data
+hdfs dfs -mkdir /hbase
+# directory for spark application history server
+hdfs dfs -mkdir /spah
+# a directory where we will add spark jars for spark running under yarn
+hdfs dfs -mkdir /sparkjars
+# check the hdfs file system creaed so far
+hdfs dfs -ls -R /
+# add the shakespeare.txt file from /vagrant local to hdfs
+hdfs dfs -put /vagrant/shakespeare.txt 
+# verify if target is not specified it is the default hdfs home direcctory /user/${USER}
+hdfs dfs -ls 
+hdfs dfs -ls /user/vagrant
+
+# start yarn
+/home/vagrant/hadoop/sbin/start-yarn.sh
+# verify yarn started
+jps -l
+sudo netstat -tulpn | grep 8088
+
+# run mapreduce word count
+hadoop jar /home/vagrant/hadoop-3.3.0/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.0.jar wordcount shakespeare.txt wcount
+
+# run map reduce word count using hadoop streaming and python
+hadoop jar /home/vagrant/hadoop-3.3.0/share/hadoop/tools/lib/hadoop-streaming-3.3.0.jar -file /home/vagrant/mapper.py -mapper /home/vagrant/mapper.py -file /home/vagrant/reducer.py -reducer /home/vagrant/reducer.py -input shakespeare.txt -output pywcount
