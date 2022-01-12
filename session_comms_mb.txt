@@ -6,6 +6,7 @@ shak_words_count = shak_tuples.reduceByKey(lambda x, y:  x + y)
 shak_words_count.take(5)
 shak_words_count_sorted = shak_words_count.sortBy(lambda x: -x[1])
 shak_words_count_sorted.take(20)
+sc.textFile('shakespeare.txt').flatMap(lambda x: x.split(' ')).filter(lambda x: x != '').map(lambda x: (x,1)).reduceByKey(lambda x, y: x + y).sortBy(lambda x: -x[1]).take(20)
 
 # this is where will be sharing code, commands for the MB workshop
 192.168.50.2  master.e4rlearning.com master
