@@ -1,4 +1,4 @@
-shak_words = shak_rdd.flatMap(lambda x: x.split('  ')
+shak_words = shak_rdd.flatMap(lambda x: x.split('  '))
 shak_words.take(5)
 # this is where will be sharing code, commands for the MB workshop
 192.168.50.2  master.e4rlearning.com master
