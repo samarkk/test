@@ -1,3 +1,6 @@
+hdfs dfs -mkdir pkgdemo
+hdfs dfs -put /vagrant/spark-python/logparse.py pkgdemo
+
 shak_words = shak_rdd.flatMap(lambda x: x.split('  '))
 shak_words.take(5)
 shak_tuples = shak_words.map(lambda x: (x, 1))
