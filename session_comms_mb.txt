@@ -1,5 +1,6 @@
 hdfs dfs -mkdir pkgdemo
 hdfs dfs -put /vagrant/spark-python/logparse.py pkgdemo
+spark-submit --master yarn --num-executors 3 --executor-memory 1400m --conf spark.memory.fraction=0.9 /vagrant/spark-python/SparkLogProcessorModPkg.py hdfs://master:8020/user/vagrant/pkgdemo apachelogs.gz
 
 shak_words = shak_rdd.flatMap(lambda x: x.split('  '))
 shak_words.take(5)
