@@ -1,3 +1,10 @@
+# please ensure to run this on master
+hive --service metastore 2>&1 &>/dev/null &
+tlpg 9083
+# this below is to check the log - to terminate this press ctrl and c together
+tail -f /tmp/vagrant/hive.log
+
+
 # run spark history server on the admin machine
 /home/vagrant/spark/sbin/start-history-server.sh
 hdfs dfs -mkdir pkgdemo
