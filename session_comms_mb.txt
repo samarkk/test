@@ -1,3 +1,12 @@
+# we want to copy 201819 directory to hdfs
+# to copy large nested structures it is better to use hadoop distcp
+# it runs a map reduce operation to copy the directory in parallel to the target destination in hdfs
+# we will need to start yarn first
+# be in the master machine and issue
+/home/vagrant/hadoop/sbin/start-yarn.sh
+# then do hadoop distcp
+hadoop distcp file:///vagrant/distcp hdfs://master:8020/user/vagrant
+
 # please ensure to run this on master
 hive --service metastore 2>&1 &>/dev/null &
 tlpg 9083
