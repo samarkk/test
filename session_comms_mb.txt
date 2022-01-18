@@ -5,7 +5,7 @@
 # be in the master machine and issue
 /home/vagrant/hadoop/sbin/start-yarn.sh
 # then do hadoop distcp
-hadoop distcp file:///vagrant/distcp hdfs://master:8020/user/vagrant
+hadoop distcp file:///vagrant/201819 hdfs://master:8020/user/vagrant
 
 # please ensure to run this on master
 hive --service metastore 2>&1 &>/dev/null &
