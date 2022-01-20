@@ -1,3 +1,4 @@
+pyspark --packages mysql:mysql-connector-java:8.0.26
 mysql --local-infile=1 -u root -pramanShastri24! < /vagrant/spark-python/scripts/mysql_mock_table_creation.sql
 https://github.com/samarkk/spark-python/blob/main/sparksql/fo_cm_analysis.py
 # we want to copy 201819 directory to hdfs
