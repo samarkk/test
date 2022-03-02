@@ -1,3 +1,19 @@
+ int n = 0;
+        try {
+            while (n < 5) {
+                generateRandomProducerRecord("ide_topic", 10).forEach(prec ->
+                        producer.send(prec, new Callback() {
+                            @Override
+                            public void onCompletion(RecordMetadata metadata, Exception exception) {
+                                System.out.println("callback received at " + getCurrentTime());
+                                System.out.println("Message sent to topic: " + metadata.topic() + "  , to partition " +
+                                        metadata.partition() + " , with offset: " + metadata.offset() +  ", for key: " +
+                                        prec.key());
+                            }
+                        }));
+                n += 1;
+            }
+        } 
 kafka-console-consumer --bootstrap-server master.e4rlearning.com:9092 --topic ide_topic --property print.key=true --property print.offset=true --property print.partition=true --property print.timestamp=true --from-beginning
 
 verify you are in the master machine
