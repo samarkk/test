@@ -1,1 +1,3 @@
-
+verify you are in the master machine
+sudo ssytemctl start zookeeper
+tlpg 2181
