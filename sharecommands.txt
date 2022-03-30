@@ -1,3 +1,4 @@
+# test git pull and then in vs code
 #ssh into master and start ksql-server
 ksql-server-start -daemon /home/vagrant/confluent/etc/ksql-server.properties
 
