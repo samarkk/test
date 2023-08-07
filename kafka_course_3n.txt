@@ -110,8 +110,8 @@ kafka-console-producer --bootstrap-server master:9092 --topic key-topic --proper
 # start three consumers 
 kafka-console-consumer --bootstrap-server master:9092 --topic key-topic --property print.key=true --from-beginning
 
-kafka-consumer-groups --bootstrap-server master:9083 --describe --group firstgroup
-kafka-consumer-groups --bootstrap-server master:9083 --reset-offsets --to-earliest --topic  --group  --execute
+kafka-consumer-groups --bootstrap-server master:9092 --describe --group firstgroup
+kafka-consumer-groups --bootstrap-server master:9092 --reset-offsets --to-earliest --topic  --group  --execute
 
 ########################################################################
  Java producer and consumer API
