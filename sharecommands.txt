@@ -6,4 +6,10 @@ cat core-site.xml
 cat hdfs-site.xml
 tree /home/vagrant/hadoopdata
 hdfs namenode -format
+ls -l /home/vagrant/hadoop/sbin
+ls -l /home/vagrant/hadoop/bin
+hdfs --daemon start namenode
+hdfs --daemon start datanode
+jps
+
 
