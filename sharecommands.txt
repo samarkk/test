@@ -16,5 +16,5 @@ hdfs dfs -ls
 hdfs dfs -ls /user/vagrant
 hdfs dfs -mkdir /tmp
 hdfs dfs -chmod 7777 /tmp
-
+hdfs dfs -ls -R /
 
