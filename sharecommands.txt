@@ -1,1 +1,2 @@
 session commands for sharing
+https://github.com/samarkk/kafka-examples/blob/main/src/main/scripts/fotbl_mysql_create.sql
