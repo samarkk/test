@@ -17,4 +17,10 @@ hdfs dfs -ls /user/vagrant
 hdfs dfs -mkdir /tmp
 hdfs dfs -chmod 7777 /tmp
 hdfs dfs -ls -R /
+hdfs dfs -put /home/vagrant/fwc.txt
+hdfs dfs -ls
+hdfs dfs -ls /user/vagrant
+hdfs dfs -cat fwc.txt
+hdfs dfs -mkdir deldir
+hdfs dfs -cp fwc.txt deldir/abc.txt
 
