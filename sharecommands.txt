@@ -1,2 +1,3 @@
 session commands for sharing
 https://github.com/samarkk/kafka-examples/blob/main/src/main/scripts/fotbl_mysql_create.sql
+kafka-avro-console-consumer   --bootstrap-server master:9092 --topic nsefo-topic-avro --from-beginning --property print.key=true  --key-deserializer org.apache.kafka.common.serialization.StringDeserialize
