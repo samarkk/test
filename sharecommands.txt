@@ -4,4 +4,6 @@ kafka-avro-console-consumer   --bootstrap-server master:9092 --topic nsefo-topic
 cd /home/vagrant/hadoop/etc/hadoop
 cat core-site.xml
 cat hdfs-site.xml
+tree /home/vagrant/hadoopdata
+hdfs namenode -format
 
