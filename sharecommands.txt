@@ -27,5 +27,6 @@ hdfs dfs -get deldir/abc.txt /home/vagrant
 hdfs dfs -rm -r -rf deldir
 hdfs dfs -ls -R
 hdfs dfs -mkdir -p /user/Administrator
+hdfs dfs -chowm Administratr:hadoop /user/Administrator
 
 
