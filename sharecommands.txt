@@ -29,5 +29,5 @@ hdfs dfs -ls -R
 hdfs dfs -mkdir -p /user/Administrator
 hdfs dfs -chown Administrator:hadoop /user/Administrator
 for x in {1..1000};do echo $x >> /home/vagrant/demosa.txt;done
-
+for x in {1..1000};do echo "message $x" >> /home/vagrant/demosa.txt;done
 
