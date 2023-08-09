@@ -28,5 +28,6 @@ hdfs dfs -rm -r -rf deldir
 hdfs dfs -ls -R
 hdfs dfs -mkdir -p /user/Administrator
 hdfs dfs -chown Administrator:hadoop /user/Administrator
+for x in {1..1000};do echo $x >> /home/vagrant/demosa.txt;done
 
 
