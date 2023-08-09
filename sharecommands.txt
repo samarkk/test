@@ -30,8 +30,7 @@ hdfs dfs -mkdir -p /user/Administrator
 hdfs dfs -chown Administrator:hadoop /user/Administrator
 for x in {1..1000};do echo $x >> /home/vagrant/demosa.txt;done
 for x in {1..1000};do echo "message $x" >> /home/vagrant/demosa.txt;done
-cp /home/vagrant/confluent/etc/kafka/connect-distributed.properties /vagrant
-cp /vagrant/connect-distributed.properties /home/vagrant/confluent/etc/kafka
+sed -i   s/true/false/g  /home/vagrant/confluent/etc/kafka/connect-distributed.properties
 start connect-distributed
 for x in $(cat /home/vagrant/c/test/fo01JAN2020bhav.csv);do echo $x >> /home/vagrant/distdemo.txt;done
 
