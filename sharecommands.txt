@@ -33,6 +33,9 @@ for x in {1..1000};do echo "message $x" >> /home/vagrant/demosa.txt;done
 sed -i   s/true/false/g  /home/vagrant/confluent/etc/kafka/connect-distributed.properties
 start connect-distributed
 for x in $(cat /home/vagrant/c/test/fo01JAN2020bhav.csv);do echo $x >> /home/vagrant/distdemo.txt;done
-sudo yum install -y java-11-openjdk-devel.x86_64
+sudo yum install -y java-11-openjdk-devel.x86_64+
+sudo update-alternatives config java
+sudo  update-alternatives config javac
+
 
 
