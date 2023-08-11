@@ -40,6 +40,15 @@ master:7070/state/keyvalue/word-count/kafka
 master:7070/state/keyvalues/word-count/all
 master:7070/state/keyvalues/windowed-word-count/all
 master:7070/state/keyvalues/word-count/range/a/m
+# og in as root
+sudo -i
+/home/vagrant/confluent/bin/ksql-server-start -daemon /home/vagrant/confluent/etc/ksqldb/ksql-server.properties
+tlpg 8088
+# exit
+exit
+
+
+
 
 
 
