@@ -47,7 +47,7 @@ tlpg 8088
 # exit
 exit
 sudo chmod -R 777 /tmp
-sed  -i s/'# ksql.schema.registry'/sql.schema.registry/g /home/vagrant/confluent/etc/ksqldb/ksql-server.properties
+sed  -i s/'# ksql.schema.registry'/ksql.schema.registry/g /home/vagrant/confluent/etc/ksqldb/ksql-server.properties
 
 
 
