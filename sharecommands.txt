@@ -46,6 +46,8 @@ sudo -i
 tlpg 8088
 # exit
 exit
+sudo chmod -R 777 /tmp
+
 
 
 
