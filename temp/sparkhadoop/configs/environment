@@ -1,0 +1,8 @@
+export JAVA_HOME="/usr/lib/jvm/jdk8"
+export HADOOP_HOME=/usr/lib/hadoop
+export HADOOP_CONF_DIR=/usr/lib/hadoop/etc/hadoop
+export HIVE_HOME=/usr/lib/hive
+export SPARK_HOME=/usr/lib/spark
+export CONFLUENT_HOME=/usr/lib/confluent
+export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/home/samar/.local/bin:/home/samar/bin:/usr/lib/jvm/jdk8/bin:/usr/lib/hadoop/bin:/usr/lib/spark/bin:/usr/lib/hive/bin:/usr/lib/confluent/bin
+

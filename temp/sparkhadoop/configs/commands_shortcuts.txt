@@ -1,0 +1,42 @@
+export JAVA_HOME=/usr/lib/jvm/java-openjdk
+export HADOOP_HOME=/home/samar/hadoop
+export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+export HIVE_HOME=/home/samar/hive
+export SPARK_HOME=/home/samar/spark
+export ES_HOME=/home/samar/elasticsearch
+export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin:$ES_HOME/bin
+
+alias tlpg="sudo netstat -tulpn | grep "
+alias psfg="sudo ps faux | grep "
+alias stann="hdfs --daemon start namenode"
+alias stadn="hdfs --daemon start datanode"
+alias stahms="hive --service metastore 2>&1 &>/dev/null &"
+alias starm="yarn --daemon start resourcemanager"
+alias stanm="yarn --daemon start nodemanager"
+alias stajhs="mapred --daemon start historyserver"
+alias stashs="/home/samar/spark/sbin/start-history-server.sh"
+alias stonn="hdfs --daemon stop namenode"
+alias stodn="hdfs --daemon stop datanode"
+alias stohms="hive --service metastore 2>&1 &>/dev/null &"
+alias storm="yarn --daemon stop resourcemanager"
+alias stonm="yarn --daemon stop nodemanager"
+alias stojhs="mapred --daemon stop historyserver"
+alias stoshs="/home/samar/spark/sbin/stop-history-server.sh"
+alias stazk="/home/samar/confluent/bin/zookeeper-server-start -daemon /home/samar/confluent/etc/kafka/zookeeper.properties"
+alias stakb="/home/samar/confluent/bin/kafka-server-start -daemon /home/samar/confluent/etc/kafka/server.properties"
+alias staksql="/home/samar/confluent/bin/ksql-server-start -daemon /home/samar/confluent/etc/ksqldb/ksql-server.properties"
+alias stascher="/home/samar/confluent/bin/schema-registry-start -daemon /home/samar/confluent/etc/schema-registry/schema-registry.properties"
+alias stozk="/home/samar/confluent/bin/zookeeper-server-stop"
+alias stokb="/home/samar/confluent/bin/kafka-server-stop"
+alias stoksql="/home/samar/confluent/bin/ksql-server-stop"
+alias stoscher="/home/samar/confluent/bin/schema-registry-stop"
+
+### for .hiverc
+set hive.cli.print.header=true;
+set hive.cli.print.current.db=true;
+
+### for .hadooprc
+hadoop_add_to_classpath_tools hadoop-aws
+
+### for hadoop-env.sh
+export HADOOP_OPTIONAL_TOOLS="hadoop-aws"

@@ -1,0 +1,54 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Avoid having the worker starting before the master node
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+
+Vagrant.configure(2) do |config|
+
+config.vm.synced_folder '../../tmp/vmdloads', '/home/vagrant/vmds'
+config.vm.synced_folder 'C:\\', '/home/vagrant/c'
+config.vm.synced_folder 'D:\\', '/home/vagrant/d'
+  # Master Node
+config.vm.define "master" do |master|
+    master.vm.box = "centos7bd"
+    #master.vm.synced_folder "../mnt/master", "/data-from-host"
+	master.vm.hostname = "master.e4rlearning.com"
+    master.hostmanager.aliases = "master"
+    master.vm.network "private_network", ip: "192.168.56.2"
+    # master.vm.network "forwarded_port", guest: 6443, host: 6443
+    # master.vm.network "forwarded_port", guest: 8001, host: 8001
+    # master.vm.network "forwarded_port", guest: 8080, host: 9080
+    # master.vm.network "private_network", ip: "192.168.33.3", virtualbox__intnet: true
+    # master.vm.provision "file", source: "cassandra.yaml", destination: "/home/vagrant/cassandra/conf/cassandra.yaml"
+
+    master.vm.provider "virtualbox" do |v|
+      v.name = "master1"
+      v.memory = 6144
+      v.cpus = 4
+    #   v.gui = true
+    end
+  end
+
+  NodeCount = 2
+
+  (1..NodeCount).each do |i|
+    config.vm.define "node#{i}" do |worker|
+      worker.vm.box = "centos7bd"      
+	  worker.vm.hostname = "node#{i}.e4rlearning.com"
+      worker.hostmanager.aliases = "node#{i}"
+    #   worker.vm.synced_folder "../mnt/worker-#{i}", "/data-from-host"  
+        worker.vm.network "private_network", ip: "192.168.56.#{2 + i}"
+   
+    worker.vm.provision "shell", path: "bootstrap_worker.sh"
+    #   worker.vm.provision "file", source: "cassandra#{i+1}.yaml", destination: "/home/vagrant/cassandra/conf/cassandra.yaml"
+      worker.vm.provider "virtualbox" do |v|
+        v.name = "node#{i}1"
+        v.memory = 3072
+        v.cpus = 2
+        # v.gui = true
+      end
+    end
+  end
+
+end

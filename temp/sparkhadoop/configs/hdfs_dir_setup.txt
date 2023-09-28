@@ -1,0 +1,12 @@
+1. install java-devel to get jps
+2. link jdk8 to 
+
+sudo yum update
+
+
+hdfs dfs -mkdir /user
+hdfs dfs -mkdir /user/samar
+hdfs dfs -mkdir /tmp
+hdfs dfs -chmod 777 -R /tmp
+
+sudo yum update
