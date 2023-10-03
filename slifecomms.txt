@@ -7,5 +7,7 @@ hdfs namenode -format
 tree /home/vagrant/hadoopdata
 cp /home/vagrant/hadoop/etc/hadoop/hadoop-env.sh /vagrant
 cp /vagrant/hadoop-env.sh /home/vagrant/hadoop/etc/hadoop
+https://github.com/samarkk/spark_python
+# look for ntbks in this repo - right now, check out spark_transformations, spark_actions
 
 
