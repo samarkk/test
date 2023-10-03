@@ -1,3 +1,6 @@
 https://cvmskk.s3.amazonaws.com/centosbd_aug_2_2023_2.box
 ls -l /home/vagrant/hadoopdata
+cat /home/vagrant/hadoop/etc/hdfs-site.xml
+hdfs namenode -format
+tree /home/vagrant/hadoopdata
 
