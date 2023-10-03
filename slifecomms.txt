@@ -5,4 +5,7 @@ cat /home/vagrant/hadoop/etc/hadoop/core-site.xml
 cat /home/vagrant/hadoop/etc/hadoop/hdfs-site.xml
 hdfs namenode -format
 tree /home/vagrant/hadoopdata
+cp /home/vagrant/hadoop/etc/hadoop/hadoop-env.sh /vagrant
+cp /vagrant/hadoop-env.sh /home/vagrant/hadoop/etc/hadoop
+
 
