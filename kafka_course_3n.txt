@@ -1,49 +1,52 @@
+export bdir="/tmp/confluent.934030"
+
 ########################################################################
 start zookeeper and kafka server
 ########################################################################
 
-# check zookeeper status
-sudo systemctl status zookeeper
-sudo jps
-sudo netstat -tlpn | grep 2181
-# tlpg is an alias for the command above sudo netstat -tlpn | grep
+# start zookeeper  as a backgroud daemon process
+zookeeper-server-start -daemon /home/samar/confluent/etc/kafka/zookeeper.properties
+
+# verify port 2181 occupied
+# tlpg is only a synonym for sudo netstat -tulpn | grep 
 tlpg 2181
-# check the zookeeper service file
-cat /etc/systemd/system/zookeeper.service
-# check the zookeeper properties
-cat /home/vagrant/confluent/etc/kafka/zookeeper.properties
 
+# the logs are in the logs directory under confluent
+ls -l $bdir/zookeeper/logs/
+# we can check the logs to undrestand problems and generally see what's going on
 
-# start the kafka server
-sudo systemctl start kafka
-# check for it
-sudo systemctl status kafka
-sudo jps
-tlpg 909
+# zookeeper-shell localhost:2181
+# ls / 
+# we shall see brokers, topics as they are created
 
-# check the kafka service file
-cat /etc/systemd/system/kafka.service
-# check the kafka server properties
-cat /home/vagrant/confluent/etc/kafka/server.properties
-# in listeners, plaintext, ssl and sasl are enabled
-# advertised listeners has the host name to enable connections from the outside world
-# log.dirs is where the kafka logs, the partitions are stored
-# num.partitions = 3 leads to topics beinc created with default 3 partitions
-# broker.id and zookeeper.connect
-# for brokers to be part of a cluster, need same zookeeper.connect and different broker ids
+# start kafka server
+# check out the server.properties file in the kafka configuration directory
+less /home/samar/confluent/etc/kafka/server.properties
+# broker.id has to be different for each broker
+# same zookeeper.connect will make different brokers part of a cluster
+
+# start kafka-server  as a daemon
+kafka-server-start -daemon /home/samar/confluent/etc/kafka/server.properties
+# verify port 9092 occupied
+tlpg 9092
+
+# logs will be in $bdir/kafka/logs in server.log
+tail -f /home/samar/confluent/logs/server.log
+
+# check out the broker node in the zookeeper shell
+
+-----------------------------------------------------------------------
 
 ########################################################################
 create, delete, topics
 ########################################################################
-kafka-topics --bootstrap-server master:9092 --list
+kafka-topics --bootstrap-server localhost:9092 --list
 
-kafka-topics --bootstrap-server master:9092 --create --topic first-topic --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic first-topic --partitions 3 --replication-factor 1
 
-kafka-topics --bootstrap-server master:9092 --topic first-topic --describe
+kafka-topics --bootstrap-server localhost:9092 --topic first-topic --describe
 
-# to delete have to execute the delete command
-# do not delete
-kafka-topics --bootstrap-server master:9092 --topic --delete first-topic
+kafka-topics --bootstrap-server localhost:9092 --topic --delete first-topic
 
 ########################################################################
 tmux elementary commands and navigation
@@ -58,38 +61,13 @@ Ctrl+b q + pane-number - move to the numbered pane
 ########################################################################
  check the kafka console consumer and kafka console producer in action
 ########################################################################
-# tmux and create two panes - issue the command tmux 
-# in one pane
-# to copy in tmux pane do shift + right_click
-kafka-console-producer --bootstrap-server master:9092 --topic first-topic
+tmux and createt two panes
+in one pane
+kafka-console-producer --bootstrap-server localhost:9092 --topic first-topic
 in other pane
-kafka-console-consumer --bootstrap-server master:9092 --topic first-topic
+kafka-console-consumer --bootstrap-server localhost:9092 --topic first-topic
 in the producer pane, type in stuff and see it appearing alongside in the consumer pane
 
-# to see more info about messages
-kafka-console-consumer --help
-kafka-console-consumer --bootstrap-server master:9092 --topic first-topic  --property print.key=true  --property print.partition=true --property print.offset=true --property print.timestamp=true --from-beginning
-
-########################################################################
-explore visual tools for examinging zookeeper and kafkaserver through 
-docker containers
-########################################################################
-# when the machine starts docker is automatically started
-# check docker status
-sudo systemctl status docker
-# check the containers which have been started
-elkozmon/zoonavigator is for zookeeper
-hlebalbau/kafka-manager is for kafka brokers and topics ui
-landoop/kafka-topics-ui is for kafka-topics
-# note that 9001 port from the linux machine is forwarded to docker zookeeper container and port 9000 for kafka manager container
-# in browser go to 
-192.168.56.2:9001
-# for connection string put in 
-192.168.56.2:2181
-
-# to see kafka-topics ui start the kafka-rest service
-/home/vagrant/confluent/bin/kafka-rest-start -daemon /home/vagrant/confluent/etc/kafka-rest/kafka-rest.properties
-# go to 192.168.156.2:8001
 
 ########################################################################
 explore kafka consumer groups
@@ -97,90 +75,48 @@ explore kafka consumer groups
 # set up tmux to have producer in one pane and three consumers, 
 part of a consumer group, one each in a different pane
 # start producer to write to a topic
-kafka-console-producer --topic first-topic --bootstrap-server master:9092
+kafka-console-producer --topic first-topic --bootstrap-server localhost:9092
 # one by one start a consumer in a group
-kafka-console-consumer --bootstrap-server master:9092 --topic first-topic --group firstgroup --from-beginning
+kafka-console-consumer --bootstrap-server localhost:9092 --topic first-topic --group firstgroup --from-beginning
 # set up three more panes and start three more consumers to consume the
 topic 
-kafka-console-consumer --bootstrap-server master:9092 --topic first-topic --group secondgroup --from-beginning
+kafka-console-consumer --bootstrap-server localhost:9092 --topic first-topic --group secondgroup --from-beginning
 # divide the producer pane into two and start another producer to write to the same topic
 # shut down all and now explore producer and consumer in consumer groups
 with messages produced with a key
-kafka-console-producer --bootstrap-server master:9092 --topic key-topic --property parse.key=true --property key.separator=, --property ignore.errors=true
+kafka-console-producer --bootstrap-server localhost:9092 --topic key-topic --property parse.key=true --property key.separator=, --property ignore.errors=true
 # start three consumers 
-kafka-console-consumer --bootstrap-server master:9092 --topic key-topic --property print.key=true --from-beginning
-
-kafka-consumer-groups --bootstrap-server master:9092 --describe --group firstgroup
-kafka-consumer-groups --bootstrap-server master:9092 --reset-offsets --to-earliest --topic  --group  --execute
+kafka-console-consumer --bootstrap-server localhost:9092 --topic key-topic --property print.key=true --from-beginning
 
 ########################################################################
  Java producer and consumer API
 ########################################################################
+* check out the producer demo - ProducerDemo.java
+* producer demo with keys - ProducerDemoKeysCallback.java
 
-* check out the producer demo - send a record from the ide to kafka - ProducerDemo.java
-* producer demo with keys - send multiple records with keys at regular intervals from the ide to kafka - ProducerDemoKeysCallback.java
+* check out ConsumerDemo - ConsumerDemo.java
+* Consumer seek to an offset for a particular partition - ConsumerAssignAndSeek.java
+* Cleanup using wakeupException with Consumer running on a separate thread - ConsumerDemoWithThread.java
+* Admin client and checking, printing, resetting offsets - ConsumerDemoWithAdminClient.java
+* Reebalance listener called on partition assignment and revocation - ConsumerDemoWRBL.java
 
-* Custom serialization - Customer.java and CustomerSerializer.java in json package and CustomerJsonProducer.java in producer package
-
-* Produce stocks data from file to kafka topic - ProducerFileClient.java
-
-
-########################################################################
- Avro Java producer 
-########################################################################
-# start the schema registry
-/home/vagrant/confluent/bin/schema-registry-start -daemon /home/vagrant/confluent/etc/schema-registry/schema-registry.properties
-# verify - jps, tlpg 8081
-* Create a Generic Record to a topic - GenericRecordProducer.java
-* check out schema-registry rest api
-
-# see the schemas
-curl 192.168.56.2:8081/subjects
-# see versions for a schema
-curl 192.168.56.2:8081/subjects/<subject-name eg gcustomer-value>/versions
-# see the schema for a particular version
-curl 192.168.56.2:8081/subjects/<subject-name eg gcustomer-value>/versions/1
-# Delete a schema version - first soft delete 
-curl -X DELETE 192.168.56.2:8081/subjects/<subject-name eg gcustomer-value>/versions/1
-# Permanently delete a schema version
-curl -X DELETE 192.168.56.2:8081/subjects/<subject-name eg gcustomer-value>/versions/1?permanent=true
-
-* use avro specific reocrds to populate topic with schemas
-* check pom.xml where we have avro-maven-plugin 
-* it will generate the java avro schemas for schemas in src/main/resources/avro folder
-* check out the customer.avsc 
-* use AvroProducer.Java to create a Kafka topic and record for the customer schema
-* use AvroConsumer.Java to read the avro record
-* open project AvroV2 - we have the version 2 schema here and the AvroProducer and AvroConsumer Classes
-* the customer.avsc in AvroV2 does not have the automated_email field and two fields, phone number and email which version one does not have
-* confirm we have full compatibility
-* we are able to produce to the same topic with either version 1 or version 2 schema
-* we are able to consume from the same topic using version 1 or version 2 schema
-* user AvroProducerFileClient.java to load fo01JAN2918bhav.csv to nsefotopic_avro, use nseforec.avsc for the nse fo avro specific record
-* see a complex nested schema - course.avsc and run AvroProducerCourse.java to produce records with nested json schema
+* Send lines from a file to a Kafka topic - ProducerFileClient.java
 
 
 ################################################################
 set up Cassandra and use it as the sink with the consumer API
 ################################################################
 
-# start cassandra 
-# press enter after the voluminous cassanda logs output in the terminal
+# check and start cassandra 
+# just issue 
 cassandra
-# verify cassandra is running - the default port is 9042
-tlpg 9042
 
 # creating a keyspace, a demo table and inserting some values
 # launch cqlsh
-# issue 
-# cqlsh master 9042
 CREATE KEYSPACE testks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
-USE testks;
-create table ttbl(sunsign text, id int, fname text, lname text, primary key ((sunsign, id)));
+create table ttbl(sunsign text, id int, fname text, lname text, primary key (sunsign, id));
 insert into ttbl(sunsign, id, fname, lname) values ('libra', 1, 'amitabh', 'bacchan');
-select * from testks.ttbl;
 insert into ttbl(sunsign, id, fname, lname) values ('libra', 2, 'hema', 'malini');
-select * from testks.ttbl;
 
 # create finks - finance keyspace
 CREATE KEYSPACE finks WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
@@ -213,18 +149,9 @@ where myVM is the hostname and 9042 is the port
 the private ip will also work
 the public ip also does
 so in vm use 
-cqlsh 192.168.56.2 9042
+cqlsh 192.168.181.138 9042
 
-run ConsumerCassandra.java to send messages from kafka nsefo-topic to cassandra fotbl
-
-# in cqlsh check 
-# when we check for records with incomplete partition key 
-# cassandra aks for allow filtering clause to be added
-select * from finks.fotable where symbol  = 'INFY';
-select * from finks.fotable where expiry = '2018-03-28' and symbol = 'INFY';
-select * from finks.fotable where expiry = '2018-03-28' and symbol = 'INFY' order by strike_pr, instrument;
-InvalidRequest: Error from server: code=2200 [Invalid query] message="Order by currently only support the ordering of columns following their declared order in the PRIMARY KEY
-  
+run ConsumerCassandra.java to send messages from kafka nsefotopic to cassandra fotbl
 
 ################################################################
 MySQL sink with the consumer API
@@ -234,34 +161,63 @@ MySQL sink with the consumer API
 # follow the steps in fotbl_mysql_create.sql to create set up for sending nsefotopic to mysql
 # run ConsumerMySQL.java to send the topic messages to mysql
 
-################################################################
-HDFS sink with the consumer API
-################################################################
 # set up for sending data to hdfs sink
 # go to hadoop conf directory
-cd /home/vagrant/hadoop/etc/hadoop
-# check hdfs-site.xml
-# note rpc-address, dfs.namenode.rpc-address is set to the ip of the machine
-# note the dfs.namenode.name.dir, 
-cat /home/vagrant/hadoop/etc/hadoop/hdfs-site.xm
-# format the hdfs namenode
-hdfs namenode -format
+cd /home/samar/hadoop/etc/hadoop
+# replace the ip used with the new ip assigned by  wsl
+sed -i s/<existing ip>/<vm ip>/g core-site.xml
+sed -i s/<existing ip>/<vm ip>/g hdfs-site.xml
 # start hdfs daemons
 hdfs --daemon start namenode
 hdfs --daemon start datanode
-# run ConsumerHDFSSink.java to send nsefo-topic messages to hdfs
+# run ConsumerHDFSSink.java to send nsefotopic messages to hdfs
 # one may get hadoop_home not set in windows, winutils may not be installed
 # worked after giving hadoop home not set error
 # one solution is to package the jar, add hadoop classpath and run the class
 # or on the windows machine download winutils and set hadoop home
-# set up the /user/vagrant home directories
-hdfs dfs -mkdir -p /user/vagrant
-# verify that user vagrant can write to it
-hdfs dfs -ls /user
-# make a world writeable /tmp directory
-hdfs dfs -mkdir /tmp
-hdfs dfs -chmod 777 /tmp
-# run consumer.ConsumerHDFSSink.java
+############################################################
+start schema-registry and docker schema registry container
+################################################################
+# start schema-registry
+schema-registry-start -daemon /home/samar/confluent/etc/schema-registry/schema-registry.properties
+
+* Create a Generic Record to a topic - GenericRecordProducer.java
+* check out schema-registry rest api
+
+# see the schemas
+curl 192.168.181.138:8081/subjects
+# see versions for a schema
+curl 192.168.181.138:8081/subjects/<subject-name eg gcustomer-value>/versions
+# see the schema for a particular version
+curl 192.168.181.138:8081/subjects/<subject-name eg gcustomer-value>/versions/1
+# Delete a schema version - first soft delete 
+curl -X DELETE 192.168.181.138:8081/subjects/<subject-name eg gcustomer-value>/versions/1
+# Permanently delete a schema version
+curl -X DELETE 192.168.181.138:8081/subjects/<subject-name eg gcustomer-value>/versions/1?permanent=true
+
+* use avro specific reocrds to populate topic with schemas
+* check pom.xml where we have avro-maven-plugin 
+* it will generate the java avro schemas for schemas in src/main/resources/avro folder
+* check out the customer.avsc 
+* use AvroProducer.Java to create a Kafka topic and record for the customer schema
+* in customer.avsc and AvroProducer.Java comment the version 1 code and check that we are able to work with version 2 to see avro schema evolution in action
+* user AvroProducerFileClient.java to load fo01JAN2918bhav.csv to nsefotopic_avro, use nseforec.avsc for the nse fo avro specific record
+
+###################################################################
+start multiple brokres for the cluster
+###################################################################
+go to /home/samar/confluent/etc/kafka/
+copy server.properties to server1.properties
+in server1.properties change broker.id to 1 
+and replace 9092 with 9093
+uncomment the two lines below and change 8090 to 8091
+#confluent.metadata.server.listeners=http://0.0.0.0:8090
+#confluent.metadata.server.advertised.listeners=http://127.0.0.1:8090
+
+start kafka server 2 
+replicate with server2.properties, port 9094 and 8092 and start kafka server 3
+
+start docker kafka server and check the three servers active
 
 ##################################################################
 check topic configurations
@@ -269,105 +225,84 @@ check topic configurations
 # see the options
 kafka-configs
 
-# create a test-config-topic to check out configurations
-kafka-topics --bootstrap-server master:9092 --create --topic test-config-topic --partitions 1 --replication-factor 1
+# create a test_config_topic to check out configurations
+kafka-topics --bootstrap-server localhost:2181 --create --topic test_config_topic --partitions 3 --replication-factor 1
 
 # describe configs for topic
-kafka-configs --bootstrap-server master:9092 --entity-type topics --entity-name test-config-topic --describe
+kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name test_config_topic --describe
 
 # add a configuration
-kafka-configs --bootstrap-server master:9092 --entity-type topics --entity-name test-config-topic  --add-config segment.ms=5000 --alter
+kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name test_config_topic  --add-config min.insync.replicas=2 --alter
 
 # check the configuration
-kafka-configs --bootstrap-server master:9092 --entity-type topics --entity-name test-config-topic --describe
+kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name test_config_topic --describe
 
 # see configurations using kafka-topics
-kafka-topics --bootstrap-server master:9092 --topic test-config-topic --describe
+kafka-topics --bootstrap-server localhost:2181 --topic test_config_topic --describe
 
 # delete configuration
-kafka-configs --bootstrap-server master:9092 --entity-type topics --entity-name test-config-topic  --delete-config segment.ms --alter
+kafka-configs --bootstrap-server localhost:9092 --entity-type topics --entity-name test_config_topic  --delete-config min.insync.replicas --alter
 
 # verify config deleted
-kafka-topics --bootstrap-server master:9092 --topic test-config-topic --describe
-
+kafka-topics --bootstrap-server localhost:2181 --topic test_config_topic --bootstrap-server
 # delete the topic
-kafka-topics --bootstrap-server master:9092 --delete --topic test-config-topic
+kafka-topics --bootstrap-server localhost:2181 --delete --topic test_config_topic
 
 ######################################################################
 log compaction check out
 ######################################################################
-kafka-topics --bootstrap-server master:9092 --create --topic shipping-address --partitions 1 --replication-factor 1 --config cleanup.policy=compact --config min.cleanable.dirty.ratio=0.001 --config segment.ms=5000
+kafka-topics --bootstrap-server localhost:2181 --create --topic shippinig_address --partitions 1 --replication-factor 1 --config cleanup.policy=compact --config min.cleanable.dirty.ratio=0.001 --config segment.ms=5000
 
-kafka-console-producer --broker-list master:9092 --topic shipping-address --property parse.key=true --property key.separator=,
+kafka-console-producer --broker-list localhost:9092 --topic shippinig_address --property parse.key=true --property key.separator=,
 
-kafka-console-consumer --bootstrap-server master:9092 --topic shipping-address --property print.key=true --property key.separator=, --from-beginning
-
+kafka-console-consumer --bootstrap-server localhost:9092 --topic shippinig_address --property print.key=true --property key.separator=,
 
 ######################################################################
 Kafka streams
 ######################################################################
-kafka-topics --bootstrap-server master:9092 --create --topic wcin --partitions 3 --replication-factor 1
-
-kafka-topics --bootstrap-server master:9092 --create --topic wcout --partitions 3 --replication-factor 1
-
 run WordCountApp.java to check basic kafka streams topology
 run kafka console producer on the input topic and kafka console consumer on the output topic simultaneously
 
-kafka-console-producer --bootstrap-server master:9092 --topic wcin
-kafka-console-consumer --bootstrap-server master:9092 --topic wcout --from-beginning --property print.key=true --value-deserializer org.apache.kafka.common.serialization.LongDeserializer
-
-# create topics for window operations outputs
-kafka-topics --bootstrap-server master:9092 --create --topic wcout-tw --partitions 3 --replication-factor 1
-
-kafka-topics --bootstrap-server master:9092 --create --topic wcout-sw --partitions 3 --replication-factor 1
-
 run WordCountTWApp.java to check window operations
-
 run kafka console producer and consumer on input and output topics simultaneously
-kafka-console-producer --bootstrap-server master:9092 --topic wcin
-
-kafka-console-consumer --bootstrap-server master:9092 --topic wcout-tw --from-beginning --property print.key=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic wcout-sw --from-beginning --property print.key=true 
 
 ######################################################################
 Streams Streams Join
 ######################################################################
 create topics - impressions, clicks, impressionsandclicks
 
-kafka-topics --bootstrap-server master:9092 --create --topic impressions --partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic clicks --partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic impressions-and-clicks --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic impressions --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic clicks --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic impressionsandclicks --partitions 3 --replication-factor 1
 
-run kafka console producer for impressions and clicks  and consumer for impressions-and-clicks
+kafka-console-producer --bootstrap-server localhost:9092 --topic impressions --property parse.key=true --property key.separator=, --property ignore.error=true 
+
+kafka-console-producer --bootstrap-server localhost:9092 --topic clicks --property parse.key=true --property key.separator=, --property ignore.error=true 
+
+kafka-console-consumer --bootstrap-server localhost:9092 --topic impressionsandclicks --property print.key=true --from-beginning 
+
+kafka-streams-application-reset --bootstrap-servers localhost:9092 --application-id ssjapp
+
+kafka-topics --bootstrap-server localhost:9092 --delete --topic impressions
+
+kafka-topics --bootstrap-server localhost:9092 --delete --topic clicks 
+
+kafka-topics --bootstrap-server localhost:9092 --delete --topic impressionsandclicks 
+
+run kafka console consumer for each of the three topics
 
 and run StreamStreamJoinDemo.java
-
-kafka-console-producer --bootstrap-server master:9092 --topic impressions --property parse.key=true --property key.separator=, --property ignore.error=true 
-
-kafka-console-producer --bootstrap-server master:9092 --topic clicks --property parse.key=true --property key.separator=, --property ignore.error=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic impressions-and-clicks --property print.key=true --from-beginning 
-
-kafka-streams-application-reset --bootstrap-servers master:9092 --application-id ssjapp
-
 
 ######################################################################
 Streams Table Join
 ######################################################################
 create topics user-regions, user-clicks and user-clicks-regions
 
-kafka-topics --bootstrap-server master:9092 --create --topic user-regions --partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic user-clicks --partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic user-clicks-regions --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic user-regions --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic user-clicks --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic user-clicks-regions --partitions 3 --replication-factor 1
 
 run kafka console consumer for each of the three topics
-
-kafka-console-consumer --bootstrap-server master:9092 --topic user-clicks --from-beginning --property print.key=true --value-deserializer org.apache.kafka.common.serialization.LongDeserializer
-
-kafka-console-consumer --bootstrap-server master:9092 --topic user-regions --from-beginning --property print.key=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic user-clicks-regions --from-beginning --property print.key=true --value-deserializer org.apache.kafka.common.serialization.LongDeserializer
 
 run StreamTableJoinDemo.java and then StreamTableJoinDriver.Demo
 
@@ -376,84 +311,133 @@ Table Table Join
 ##################################################################
 create topics - player-team, player-score, player-team-score
 
-kafka-topics --bootstrap-server master:9092 --create --topic player-team -partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic player-score --partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic player-team-score --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic player-team -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic player-score --partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic player-team-score --partitions 3 --replication-factor 1
 
-Run consumers for each of the topic and TableTableJoin.java and then TableTableJoinDriver
-
-kafka-console-consumer --bootstrap-server master:9092 --topic player-team --from-beginning --property print.key=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic player-score --from-beginning --property print.key=true --value-deserializer org.apache.kafka.common.serialization.LongDeserializer
-
-kafka-console-consumer --bootstrap-server master:9092 --topic player-team-score --from-beginning --property print.key=true
+Run TableTableJoin.java
 
 ##################################################################
 Stream Globak KTable Join 
 ##################################################################
-# create topics userp and usert   --purchases and table
+create topics userp and usert   --purchases and table
 
-kafka-topics --bootstrap-server master:9092 --create --topic userp -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic userp -partitions 3 --replication-factor 1
 
-kafka-topics --bootstrap-server master:9092 --create --topic usert -partitions 2 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic usert -partitions 3 --replication-factor 1
 
-# create topic upej and upelj - user purchase enrichment join, left join
-kafka-topics --bootstrap-server master:9092 --create --topic upej -partitions 3 --replication-factor 1
-
-kafka-topics --bootstrap-server master:9092 --create --topic upelj -partitions 3 --replication-factor 1
+create topic upej - user purchase enrichment join
+kafka-topics --bootstrap-server localhost:9092 --create --topic upej -partitions 3 --replication-factor 1
 
 run UEE.java // UserEventEnrichment.java
 run UserDataProducer.java
 
 consume topic upej and check
 
-kafka-console-consumer --bootstrap-server master:9092 --topic userp --from-beginning --property print.key=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic usert --from-beginning --property print.key=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic upej --from-beginning --property print.key=true 
-
-kafka-console-consumer --bootstrap-server master:9092 --topic upelj --from-beginning --property print.key=true 
-
 ##################################################################
 Streams branching
 #################################################################
-create topics nsefo-topic-avro and gr-1mn and lakh-to-mn and upto1lakh
+create topics nsefotopic_avro and gr-1mn and lakh-to-mn and upto1lakh
 
-kafka-topics --bootstrap-server master:9092 --create --topic nsefo-topic-avro -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic nsefotopic_avro -partitions 3 --replication-factor 1
 
-kafka-topics --bootstrap-server master:9092 --create --topic gr-1mn -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic gr-1mn -partitions 3 --replication-factor 1
 
-kafka-topics --bootstrap-server master:9092 --create --topic lakh-to-mn -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic lakh-to-mn -partitions 3 --replication-factor 1
 
-kafka-topics --bootstrap-server master:9092 --create --topic upto1lakh -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server localhost:9092 --create --topic upto1lakh -partitions 3 --replication-factor 1
 
-run AvroProducerFileClient.java to populate nsefo-topic-avro
-and kafka console consumer for the base and the three branch topics
+run AvroProducerFileClient.java to populate nsefotopic_avro
+and kafka console consumer for the it plus the three branch topics
 
-kafka-avro-console-consumer --bootstrap-server master:9092 --topic nsefo-topic-avro --from-beginning  
-
-kafka-avro-console-consumer --bootstrap-server master:9092 --topic upto1lakh --from-beginning  
-
-kafka-avro-console-consumer --bootstrap-server master:9092 --topic lakh-to-mn --from-beginning  
-
-kafka-avro-console-consumer --bootstrap-server master:9092 --topic gr-1mn --from-beginning 
 
 ##################################################################
 Streaming exactly once app
 ##################################################################
 create topics bank-transactions and bank-balance-exactly-once
 
-kafka-topics --bootstrap-server master:9092 --create --topic bank-transactions -partitions 3 --replication-factor 1
-kafka-topics --bootstrap-server master:9092 --create --topic bank-balance-exactly-once -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server master:2181 --create --topic bank-trasactions -partitions 3 --replication-factor 1
+kafka-topics --bootstrap-server master:2181 --create --topic bank-balance-exactly-once -partitions 3 --replication-factor 1
 
 run BankBalanceExactlyOnceApp.java
 run BankTransactionsProducer.java
 
-check the bank-transactions and bank-balance-exactly-once topic
-kafka-console-consumer --bootstrap-server master:9092 --topic bank-transactions --property print.key=true
+check the bank-balance-exactly-once topic
+kafka-console-consumer --bootstrap-server localhost:9092 --topic bank-balance-exactly-once --property print.key=true
 
-kafka-console-consumer --bootstrap-server master:9092 --topic bank-balance-exactly-once --property print.key=true
+##################################################################
+Strreams Stateless App 
+##################################################################
+# creae topics tweets, crypto-sentiment
+# in statelessprocessing package
+# run TwitterSentiment.java
+# run TweetsProducer.java 
+
+kafka-topics --bootstrap-server master:9092 --delete --topic players
+kafka-topics --bootstrap-server master:9092 --delete --topic products
+
+kafka-topics --bootstrap-server master:9092 --create --topic tweets --partitions 2 --replication-factor 1 
+
+kafka-topics --bootstrap-server master:9092 --create --topic crypto-sentiment --partitions 2 --replication-factor 1 
+
+kafka-console-consumer --bootstrap-server master:9092 --topic tweets --from-beginning --property print.key=true
+kafka-console-consumer --bootstrap-server master:9092 --topic crypto-sentiment --from-beginning --property print.key=true
+
+##############################################################
+Streams Stateful App
+##############################################################
+# create topics players,products,score-events,high-scores
+# use players_generator, products_generator, scores_generator to populate the player, products, score-events topic
+# Run LeaderboardApp.java and LeaderboardService
+# Check out the outputs and the endpoints 
+
+kafka-topics --bootstrap-server master:9092 --delete --topic players
+kafka-topics --bootstrap-server master:9092 --delete --topic products
+kafka-topics --bootstrap-server master:9092 --delete --topic score-events
+kafka-topics --bootstrap-server master:9092 --delete --topic high-scores
+
+kafka-topics --bootstrap-server master:9092 --create --topic score-events --partitions 2 --replication-factor 1 
+
+kafka-topics --bootstrap-server master:9092 --create --topic high-scores --partitions 2 --replication-factor 1 
+
+kafka-topics --bootstrap-server master:9092 --create --topic players --partitions 2 --replication-factor 1 
+
+kafka-topics --bootstrap-server master:9092 --create --topic products --partitions 2 --replication-factor 1 --config cleanup.policy=compact
+
+node /vagrant/players_generator.js | kafka-console-producer --bootstrap-server master:9092 --topic players --property parse.key=true --property key.separator=,
+
+node /vagrant/products_generator.js | kafka-console-producer --bootstrap-server master:9092 --topic products --property parse.key=true --property key.separator=,
+
+node /vagrant/scores_generator.js 20 1 100 | kafka-console-producer --bootstrap-server master:9092 --topic score-events
+
+kafka-console-consumer --bootstrap-server master:9092 --topic players --from-beginning --property print.key=true
+kafka-console-consumer --bootstrap-server master:9092 --topic products --from-beginning --property print.key=true
+kafka-console-consumer --bootstrap-server master:9092 --topic score-events --from-beginning --property print.key=true
+kafka-console-consumer --bootstrap-server master:9092 --topic high-scores --from-beginning --property print.key=true
+kafka-console-consumer --bootstrap-server master:9092 --topic scores-with-players --from-beginning --property print.key=true
+
+#############################################################
+Time and Windows Patient Monitoring App
+#############################################################
+# create topics pulse-events body-temp-events and alerts
+# produce data using body_temp_generator, pulse_events_generator or use the json files
+# Run App.java in timeprocessing and RestService for interactive queries
+
+kafka-topics --bootstrap-server master:9092 --create --topic pulse-events --partitions 2 --replication-factor 1 
+
+kafka-topics --bootstrap-server master:9092 --create --topic body-temp-events --partitions 2 --replication-factor 1 
+
+kafka-topics --bootstrap-server master:9092 --create --topic alerts --partitions 2 --replication-factor 1 
+
+cat /vagrant/pulse-events.json | kafka-console-producer --bootstrap-server master:9092 --topic pulse-events --property parse.key=true --property key.separator='|'
+kafka-console-consumer --bootstrap-server master:9092 --topic pulse-events --from-beginning --property print.key=true
+
+cat /vagrant/body-temp-events.json | kafka-console-producer --bootstrap-server master:9092 --topic body-temp-events --property parse.key=true --property key.separator='|'
+kafka-console-consumer --bootstrap-server master:9092 --topic body-temp-events --from-beginning --property print.key=true
+
+node pulse_events_generator.js 10 100 100  | kafka-console-producer --bootstrap-server master:9092 --topic pulse-events  --property parse.key=true --property key.separator=,
+
+node body_temp_generator.js | kafka-console-producer --bootstrap-server master:9092 --topic body-temp-events --property parse.key=true --property key.separator=,
 
 ##################################################################
 Important resources - URLs
