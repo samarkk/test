@@ -18,3 +18,14 @@ users_df = spark.read \
     .load()
 
 users_df.show()
+
+users_df.write \
+    .format("io.github.spark_redshift_community.spark.redshift") \
+    .option("url", my_conn_options['url']) \
+    .option("dbtable", 'userscopy') \
+    .option("tempdir", my_conn_options['redshiftTmpDir']) \
+    .option("aws_iam_role", my_conn_options['aws_iam_role']) \
+    .option('user', my_conn_options['user']) \
+    .option('password', my_conn_options['password']) \
+    .save()
+
